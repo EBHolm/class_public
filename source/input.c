@@ -527,9 +527,7 @@ int input_shooting(struct file_content * pfc,
                                        "omega_dcdmdr",
                                        "Omega_scf",
                                        "Omega_ini_dcdm",
-                                       "omega_ini_dcdm",
-                                       "sigma8",
-                                       "S8",
+                                       "omega_ini_dcdm"
                                        "z_decay_NEDE"};
 
   /* array of corresponding parameters that must be adjusted in order to meet the target (= unknown parameters) */
@@ -540,8 +538,6 @@ int input_shooting(struct file_content * pfc,
                                         "scf_shooting_parameter",   /* unknown param for target 'Omega_scf' */
                                         "Omega_dcdmdr",             /* unknown param for target 'Omega_ini_dcdm' */
                                         "omega_dcdmdr",             /* unknown param for target 'omega_ini_dcdm' */
-                                        "A_s",                      /* unknown param for target 'sigma8' */
-                                        "A_s",                      /* unknown param for target 'S8' */
                                         "NEDE_trigger_mass"};       /* unknown param for target 'z_decay_NEDE' */
 
   /* for each target, module up to which we need to run CLASS in order
