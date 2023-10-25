@@ -1,53 +1,149 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Bucket
-   uuid = "AB5D9DFD-7B6E-4666-AE3F-5FD3F09236D3"
+   uuid = "3D7D093B-7266-41E2-989D-91877D35C921"
    type = "1"
    version = "2.0">
    <Breakpoints>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "B9A644DC-C850-4114-90A2-C8AC9C2638BD"
+            uuid = "BBE81516-CA0D-4836-BF9F-B16B5E2AC111"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "source/perturbations.c"
+            filePath = "source/background.c"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "8963"
-            endingLineNumber = "8963"
-            landmarkName = "perturbations_derivs(tau, y, dy, parameters_and_workspace, error_message)"
+            startingLineNumber = "2042"
+            endingLineNumber = "2042"
+            landmarkName = "background_solve(ppr, pba)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "6F0837B6-3719-4956-9008-3D69F2A6E272"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "source/input.c"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "581"
+            endingLineNumber = "581"
+            landmarkName = "input_shooting(pfc, ppr, pba, pth, ppt, ptr, ppm, phr, pfo, ple, psd, pop, input_verbose, has_shooting, errmsg)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "043160E7-09B7-4A81-B1B8-8E2A6ED2E703"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "source/input.c"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "604"
+            endingLineNumber = "604"
+            landmarkName = "input_shooting(pfc, ppr, pba, pth, ppt, ptr, ppm, phr, pfo, ple, psd, pop, input_verbose, has_shooting, errmsg)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "56E64473-6A8A-46FC-A8F1-BAE93738E893"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "source/input.c"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "624"
+            endingLineNumber = "624"
+            landmarkName = "input_shooting(pfc, ppr, pba, pth, ppt, ptr, ppm, phr, pfo, ple, psd, pop, input_verbose, has_shooting, errmsg)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "5B5761A5-5D37-409E-A557-3B7E40ED0D18"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "source/input.c"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "643"
+            endingLineNumber = "643"
+            landmarkName = "input_shooting(pfc, ppr, pba, pth, ppt, ptr, ppm, phr, pfo, ple, psd, pop, input_verbose, has_shooting, errmsg)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "551E5277-CA08-4372-9EE7-6CE3E65B9DAD"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "source/input.c"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "646"
+            endingLineNumber = "646"
+            landmarkName = "input_shooting(pfc, ppr, pba, pth, ppt, ptr, ppm, phr, pfo, ple, psd, pop, input_verbose, has_shooting, errmsg)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "120E3FD8-276C-4E43-BF1C-C1EB8F915FA8"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "source/input.c"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "658"
+            endingLineNumber = "658"
+            landmarkName = "input_shooting(pfc, ppr, pba, pth, ppt, ptr, ppm, phr, pfo, ple, psd, pop, input_verbose, has_shooting, errmsg)"
             landmarkType = "9">
             <Locations>
                <Location
-                  uuid = "B9A644DC-C850-4114-90A2-C8AC9C2638BD - 74d77cf29a091d89"
+                  uuid = "120E3FD8-276C-4E43-BF1C-C1EB8F915FA8 - 243ea6aa3b79cc5f"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
-                  symbolName = "perturbations_derivs"
+                  symbolName = "input_shooting"
                   moduleName = "CLASS"
                   usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/au566942/Documents/phd/projects/bhaskar/class_public/source/perturbations.c"
+                  urlString = "file:///Users/au566942/Documents/phd/class_public/source/input.c"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "8964"
-                  endingLineNumber = "8964"
-                  offsetFromSymbolStart = "564">
+                  startingLineNumber = "658"
+                  endingLineNumber = "658"
+                  offsetFromSymbolStart = "2056">
                </Location>
                <Location
-                  uuid = "B9A644DC-C850-4114-90A2-C8AC9C2638BD - 74d77cf29a091d89"
+                  uuid = "120E3FD8-276C-4E43-BF1C-C1EB8F915FA8 - 243ea6aa3b79cc5f"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
-                  symbolName = "perturbations_derivs"
+                  symbolName = "input_shooting"
                   moduleName = "CLASS"
                   usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/au566942/Documents/phd/projects/bhaskar/class_public/source/perturbations.c"
+                  urlString = "file:///Users/au566942/Documents/phd/class_public/source/input.c"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "8964"
-                  endingLineNumber = "8964"
-                  offsetFromSymbolStart = "636">
+                  startingLineNumber = "658"
+                  endingLineNumber = "658"
+                  offsetFromSymbolStart = "2096">
                </Location>
             </Locations>
          </BreakpointContent>
@@ -55,15 +151,15 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "3061AE1E-6996-42CB-AECC-DA948D56E4B0"
+            uuid = "A8AC7E04-6679-4723-8714-E767CDE09BA1"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "source/input.c"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1233"
-            endingLineNumber = "1233"
+            startingLineNumber = "1291"
+            endingLineNumber = "1291"
             landmarkName = "input_get_guess(xguess, dxdy, pfzw, errmsg)"
             landmarkType = "9">
          </BreakpointContent>
@@ -71,32 +167,32 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "C59AD6EF-C98C-457D-ABA3-970D000AF1A3"
-            shouldBeEnabled = "No"
+            uuid = "70FDDB69-F0C2-4B08-8060-721F0D79DE3A"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "source/input.c"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2340"
-            endingLineNumber = "2340"
-            landmarkName = "input_read_parameters_species(pfc, ppr, pba, pth, ppt, input_verbose, errmsg)"
+            startingLineNumber = "1285"
+            endingLineNumber = "1285"
+            landmarkName = "input_get_guess(xguess, dxdy, pfzw, errmsg)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "13AFD4B2-2B28-4DF3-BC99-298045D2B63E"
-            shouldBeEnabled = "No"
+            uuid = "F556E0DA-6CD3-4B36-AA01-650F4B96C12F"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "source/input.c"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2341"
-            endingLineNumber = "2341"
-            landmarkName = "input_read_parameters_species(pfc, ppr, pba, pth, ppt, input_verbose, errmsg)"
+            startingLineNumber = "1295"
+            endingLineNumber = "1295"
+            landmarkName = "input_get_guess(xguess, dxdy, pfzw, errmsg)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
