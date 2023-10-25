@@ -527,7 +527,8 @@ int input_shooting(struct file_content * pfc,
                                        "omega_dcdmdr",
                                        "Omega_scf",
                                        "Omega_ini_dcdm",
-                                       "omega_ini_dcdm"};
+                                       "omega_ini_dcdm",
+                                       "z_decay_NEDE"};
 
   /* array of corresponding parameters that must be adjusted in order to meet the target (= unknown parameters) */
   char * const unknown_namestrings[] = {"h",                        /* unknown param for target '100*theta_s' */
@@ -536,7 +537,8 @@ int input_shooting(struct file_content * pfc,
                                         "omega_ini_dcdm",           /* unknown param for target 'omega_dcdmdr' */
                                         "scf_shooting_parameter",   /* unknown param for target 'Omega_scf' */
                                         "Omega_dcdmdr",             /* unknown param for target 'Omega_ini_dcdm' */
-                                        "omega_dcdmdr"};             /* unknown param for target 'omega_ini_dcdm' */
+                                        "omega_dcdmdr",             /* unknown param for target 'omega_ini_dcdm' */
+                                        "NEDE_trigger_mass"};       /* unknown param for target 'z_decay_NEDE' */
 
   /* for each target, module up to which we need to run CLASS in order
      to compute the targetted quantities (not running the whole code
@@ -547,7 +549,8 @@ int input_shooting(struct file_content * pfc,
                                         cs_background,     /* computation stage for target 'omega_dcdmdr' */
                                         cs_background,     /* computation stage for target 'Omega_scf' */
                                         cs_background,     /* computation stage for target 'Omega_ini_dcdm' */
-                                        cs_background};     /* computation stage for target 'omega_ini_dcdm' */
+                                        cs_background,     /* computation stage for target 'omega_ini_dcdm' */
+                                        cs_background};    /* computation stage for target 'z_decay_NEDE' */
 
   struct fzerofun_workspace fzw;
 
@@ -1282,6 +1285,9 @@ int input_get_guess(double *xguess,
       xguess[index_guess] = 2.43e-9/0.891*pfzw->target_value[index_guess];
       dxdy[index_guess] = 2.43e-9/0.891;
       break;
+    case z_decay_NEDE:
+      xguess[index_guess] = pow(pfzw->target_value[index_guess], 2.)/pow(ba.Bubble_trigger_H_over_m*1200., 2.);
+      dxdy[index_guess] = 2*pfzw->target_value[index_guess]/pow(ba.Bubble_trigger_H_over_m*1200., 2.);
     }
   }
 
@@ -1492,6 +1498,11 @@ int input_try_unknown_parameters(double * unknown_parameter,
       break;
     case S8:
       output[i] = fo.sigma8[fo.index_pk_m]*sqrt(ba.Omega0_m/0.3);
+      break;
+    case z_decay_NEDE:
+      output[i] = ba.z_decay - pfzw->target_value[i];
+      // printf("z_decay: %f",ba.z_decay);
+      // z_decay_temp=ba.z_decay;
       break;
     }
   }
@@ -2340,6 +2351,13 @@ int input_read_parameters_species(struct file_content * pfc,
   int flag1, flag2, flag3;
   double param1, param2, param3;
   char string1[_ARGUMENT_LENGTH_MAX_];
+  
+  double param_NEDE;
+  double rho_NEDE, w_NEDE;
+  double ca2;
+  int flag_NEDE, flag_NEDE_4;
+  char string_NEDE[_ARGUMENT_LENGTH_MAX_];
+  
   int fileentries;
   int N_ncdm=0, n, entries_read;
   double rho_ncdm;
@@ -3127,6 +3145,84 @@ int input_read_parameters_species(struct file_content * pfc,
       printf("Warning: Setting the tight_coupling_approximation = compromise_CLASS, since you selected idm-g!\n");
     ppr->tight_coupling_approximation = compromise_CLASS;
   }
+  
+  /** 7.3) New Early Dark Energy */
+
+  class_read_double("f_NEDE", pba->f_NEDE);
+  class_read_double("z_decay_NEDE", pba->z_decay);
+  class_read_double("NEDE_trigger_mass", pba->NEDE_trigger_mass);
+  class_read_double("three_eos_NEDE", pba->three_eos_NEDE);
+  class_read_double("three_ceff2_NEDE", ppt->three_ceff2_NEDE);
+  class_read_double("three_cvis2_NEDE", ppt->three_cvis2_NEDE);
+  class_read_double("H_over_m_NEDE", pba->Bubble_trigger_H_over_m);
+  class_read_double("NEDE_trigger_ini", pba->NEDE_trigger_ini);
+  class_read_double("Junction_tag", pba->Junction_tag);
+  class_read_double("Omega0_NEDE", pba->Omega0_NEDE); // Omega today, is only used internally, when finding a better fit for z_decay.
+
+  /* NEDE: Here we decide whether NEDE decays according to scenario A or B. Default: Scneario A*/
+
+  class_call(parser_read_string(pfc, "NEDE_fld_nature", &string_NEDE, &flag_NEDE_4, errmsg),
+             errmsg,
+             errmsg);
+
+  if (flag_NEDE_4 == _TRUE_)
+  {
+    if ((strstr(string_NEDE, "A") != NULL) || (strstr(string1, "stiff") != NULL) || (strstr(string1, "Scenario_A") != NULL) || (strstr(string1, "const") != NULL))
+    {
+      pba->NEDE_fld_nature = NEDE_fld_A;
+    }
+    if ((strstr(string_NEDE, "B") != NULL) || (strstr(string1, "decay") != NULL) || (strstr(string1, "Scenario_B") != NULL))
+    {
+      pba->NEDE_fld_nature = NEDE_fld_B;
+    }
+  }
+
+  // Decide if the effective sound speed is tracking the adiabatic sound speed. Default: no tracking (constant)
+  class_call(parser_read_string(pfc, "NEDE_ceff_nature", &string_NEDE, &flag_NEDE, errmsg),
+             errmsg,
+             errmsg);
+
+  if (flag_NEDE == _TRUE_)
+  {
+    if ((strstr(string_NEDE, "constant") != NULL) || (strstr(string1, "Constant") != NULL) || (strstr(string1, "CONSTANT") != NULL) || (strstr(string1, "const") != NULL))
+    {
+      ppt->NEDE_ceff_nature = NEDE_ceff_const;
+    }
+    if ((strstr(string_NEDE, "tracking") != NULL) || (strstr(string1, "Tracking") != NULL) || (strstr(string1, "TRACKING") != NULL))
+    {
+      ppt->NEDE_ceff_nature = NEDE_ceff_tracking;
+    }
+  }
+
+  if ((pba->Omega_NEDE > 0) || (pba->f_NEDE > 0))
+  {
+    class_test(pba->z_decay == 0, errmsg,
+               "In input file, z_decay_NEDE  needs to be specified for NEDE (The trigger mass as input parameter has been retired in v5).");
+
+    if (pba->Omega_NEDE == 0)
+      pba->Omega_NEDE = pba->f_NEDE * pow(pba->NEDE_trigger_mass * pba->Bubble_trigger_H_over_m / pba->H0, 2);
+    else if (pba->f_NEDE == 0)
+      pba->f_NEDE = pba->Omega_NEDE / pow(pba->NEDE_trigger_mass * pba->Bubble_trigger_H_over_m / pba->H0, 2);
+
+    if (pba->NEDE_trigger_ini != 0)
+    {
+      pba->phi_ini_trigger = pba->NEDE_trigger_ini;
+      pba->phi_prime_ini_trigger = 0; // This value is set to the attractor later.
+    }
+
+    class_test(pba->f_NEDE > 0.4, errmsg,
+               "Choose a smaller amount of NEDE as the code has not been tested for f_NEDE > 0.4.");
+
+    if (pba->NEDE_fld_nature == NEDE_fld_A)
+      pba->Omega0_NEDE = pba->Omega_NEDE * pow(1. / (1. + pba->z_decay), (3. + pba->three_eos_NEDE));
+
+    Omega_tot += pba->Omega0_NEDE;
+    Omega_tot += pba->Omega0_trigger;
+
+    /*printf("h: %f, omega_b: %f, omega_cdm: %f, ns: %f, ln10^10As: %f, tau: %f, mass: %f \n", pba->h, pba->Omega0_b * pba->h * pba->h,
+           pba->Omega0_cdm * pba->h * pba->h, ppm->n_s, log(ppm->A_s / 1.e-10), pth->tau_reio);*/
+  }
+
 
   /* ** ADDITIONAL SPECIES ** */
 
@@ -5806,6 +5902,27 @@ int input_default_params(struct background *pba,
   /** 7.2.4.b) temperature scaling idm_g */
   pth->n_index_idm_g = 0;
   ppt->has_idm_soundspeed = _FALSE_;
+  
+  /** 7.3) New EDE parameters */
+  pba->Omega_trigger_decay = 0.;
+  pba->three_eos_NEDE = 2.; // Default: w=2/3.
+  pba->Omega_NEDE = 0.;
+  pba->f_NEDE = 0;
+  pba->Omega0_NEDE = 0.;
+  pba->Omega0_trigger = 0.;
+  pba->decay_flag = _FALSE_; // Initially the decay has not yet taken place.
+  pba->Junction_tag = 1;     // Default: standard junction condition inferred from matching.
+  pba->NEDE_trigger_ini = 0.001;
+
+  pba->Bubble_trigger_H_over_m = .2; // Default value ionferred from miscroscpic model.
+  pba->NEDE_trigger_mass = 0.;
+  pba->z_decay = 0.;
+  pba->a_decay = 0.;
+
+  ppt->three_ceff2_NEDE = 2.; // Default: matches adiabatic sound speed.
+  ppt->three_cvis2_NEDE = 0.;
+  pba->NEDE_fld_nature = NEDE_fld_A;
+  ppt->NEDE_ceff_nature = NEDE_ceff_const;
 
   /* ** ADDITIONAL SPECIES ** */
 
