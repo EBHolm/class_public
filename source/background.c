@@ -407,7 +407,7 @@ int background_functions(
                            
   /* NEDE */
   double rho_NEDE_decay;
-  double w_NEDE, dw_over_da_NEDE, integral_NEDE;
+  double w_NEDE, dw_over_da_NEDE;
   
   /** - initialize local variables */
   rho_tot = 0.;

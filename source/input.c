@@ -2351,10 +2351,7 @@ int input_read_parameters_species(struct file_content * pfc,
   int flag1, flag2, flag3;
   double param1, param2, param3;
   char string1[_ARGUMENT_LENGTH_MAX_];
-  
-  double param_NEDE;
-  double rho_NEDE, w_NEDE;
-  double ca2;
+
   int flag_NEDE, flag_NEDE_4;
   char string_NEDE[_ARGUMENT_LENGTH_MAX_];
   
@@ -3216,9 +3213,6 @@ int input_read_parameters_species(struct file_content * pfc,
     if (pba->NEDE_fld_nature == NEDE_fld_A)
       pba->Omega0_NEDE = pba->Omega_NEDE * pow(1. / (1. + pba->z_decay), (3. + pba->three_eos_NEDE));
 
-    Omega_tot += pba->Omega0_NEDE;
-    Omega_tot += pba->Omega0_trigger;
-
     /*printf("h: %f, omega_b: %f, omega_cdm: %f, ns: %f, ln10^10As: %f, tau: %f, mass: %f \n", pba->h, pba->Omega0_b * pba->h * pba->h,
            pba->Omega0_cdm * pba->h * pba->h, ppm->n_s, log(ppm->A_s / 1.e-10), pth->tau_reio);*/
   }
@@ -3337,6 +3331,10 @@ int input_read_parameters_species(struct file_content * pfc,
       printf(" -> matched budget equations by adjusting Omega_scf = %g\n",pba->Omega0_scf);
     }
   }
+  
+  /* NEDE budget, both zero if no NEDE */
+  Omega_tot += pba->Omega0_NEDE;
+  Omega_tot += pba->Omega0_trigger;
 
   /* ** END OF BUDGET EQUATION ** */
 
