@@ -499,8 +499,6 @@ int background_functions(
    // if (-a_rel*0.99 <= pba->a_decay || pba->a_decay ==0 ) {
    phi = pvecback_B[pba->index_bi_phi_trigger];
    phi_prime = pvecback_B[pba->index_bi_phi_prime_trigger];
-   // if (a_rel>0.99)
-   // printf("phi: %f",phi);
    pvecback[pba->index_bg_phi_trigger] = phi;                                                    // value of the trigger field phi
    pvecback[pba->index_bg_phi_prime_trigger] = phi_prime;                                        // value of the trigger field derivative wrt conformal time
    pvecback[pba->index_bg_V_trigger] = V_trigger(pba, phi);                                      // V_scf(pba,phi); //write here potential as function of phi
@@ -594,9 +592,10 @@ int background_functions(
                            
   /* NEDE: Here we calculate bg quantities of the New EDE fluid like its energy density at every time step, we have to check if we are before or after the phase transition. */
   if (pba->has_NEDE == _TRUE_) {
-    if (a < pba->a_decay || pba->a_decay == 0) {
+    double a_decay = 1./(1. + pba->z_decay);
+    if (a < a_decay || a_decay == 0) {
      /* w=-1 phase */
-     /*Note the class convention according to which 3 Mpl^2 is absorbed in rho, i.e. rho_crit = H0^2. */
+     /* Note the class convention according to which 3 Mpl^2 is absorbed in rho, i.e. rho_crit = H0^2. */
      rho_NEDE_decay = pba->Omega_NEDE * pow(pba->H0, 2);
      /* Save value of rho in array for later use. */
      pvecback[pba->index_bg_rho_NEDE] = rho_NEDE_decay;
@@ -851,7 +850,7 @@ int background_quantities_NEDE(
   {
   case NEDE_fld_A:
     w_local = pba->three_eos_NEDE / 3.;
-    rho_local = (pba->Omega_NEDE) * pow(pba->H0, 2) * pow(pba->a_decay / a, 3. + 3. * w_local);
+    rho_local = (pba->Omega_NEDE) * pow(pba->H0, 2) * pow(1./(1. + pba->z_decay) / a, 3. + 3. * w_local);
     w_prime = 0.;
 
     if (w != NULL)
@@ -1104,7 +1103,7 @@ int background_indices(
   pba->has_idr = _FALSE_;
   pba->has_curvature = _FALSE_;
   pba->has_varconst  = _FALSE_;
-  pba->has_NEDE = _FALSE_;
+  // pba->has_NEDE = _FALSE_;
   pba->has_NEDE_pert = _FALSE_;
   pba->has_NEDE_trigger = _FALSE_;
 
@@ -1123,8 +1122,9 @@ int background_indices(
       pba->has_dr = _TRUE_;
   }
   
-  if (pba->Omega_NEDE != 0.) {
-    pba->has_NEDE = _TRUE_;
+  //if (pba->Omega_NEDE != 0.) {
+  if (pba->has_NEDE == _TRUE_) {
+    //pba->has_NEDE = _TRUE_;
     pba->has_NEDE_pert = _TRUE_;
     /* Here we decide if we include a trigger field */
     if (pba->NEDE_trigger_ini != 0.)
