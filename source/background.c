@@ -2947,7 +2947,7 @@ int background_derivs(
   }
   
   if (pba->has_NEDE_trigger == _TRUE_) {
-    if ((H < pba->trigger_fluid_H_over_m*pba->NEDE_trigger_mass) && (pba->a_trigger_fluid == 1.)) {
+    if ((H < pba->trigger_fluid_H_over_m*pba->NEDE_trigger_mass) && (pba->a_trigger_fluid == 100.)) {
       // Turn on trigger fluid approximation
       pba->a_trigger_fluid = a;
       

@@ -3277,6 +3277,8 @@ int input_read_parameters_species(struct file_content * pfc,
     class_test(((pba->NEDE_trigger_ini == 0.) && (pba->Omega0_trigger == 0.)), errmsg,
                "You must input either 'NEDE_trigger_ini' or 'Omega0_NEDE_trigger_DM' to set the trigger density.")
 
+    class_read_double("NEDE_trigger_fluid_H_m", pba->trigger_fluid_H_over_m);
+    
     pba->phi_prime_ini_trigger = 0; // This value is set to the attractor later.
 
     if (pba->NEDE_fld_nature == NEDE_fld_A)
@@ -5980,7 +5982,7 @@ int input_default_params(struct background *pba,
   pba->NEDE_trigger_ini = 0.;
   pba->Omega0_trigger = 0.; // Default value
   pba->trigger_fluid_H_over_m = 0.; /* Trigger fluid threshold. Default: Never turn on */
-  pba->a_trigger_fluid = 1.; /* True iff trigger field fluid approximation is turned on */
+  pba->a_trigger_fluid = 100.; /* True iff trigger field fluid approximation is turned on; default is never on */
 
   pba->Bubble_trigger_H_over_m = .2; // Default value ionferred from miscroscpic model.
   pba->NEDE_trigger_mass = 0.;
