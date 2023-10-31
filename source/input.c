@@ -528,7 +528,9 @@ int input_shooting(struct file_content * pfc,
                                        "Omega_scf",
                                        "Omega_ini_dcdm",
                                        "omega_ini_dcdm",
-                                       "z_decay_NEDE"};
+                                       "z_decay_NEDE",
+                                       "Omega0_NEDE_trigger_DM",
+                                       "NEDE_trigger_ini"};
 
   /* array of corresponding parameters that must be adjusted in order to meet the target (= unknown parameters) */
   char * const unknown_namestrings[] = {"h",                        /* unknown param for target '100*theta_s' */
@@ -538,7 +540,9 @@ int input_shooting(struct file_content * pfc,
                                         "scf_shooting_parameter",   /* unknown param for target 'Omega_scf' */
                                         "Omega_dcdmdr",             /* unknown param for target 'Omega_ini_dcdm' */
                                         "omega_dcdmdr",             /* unknown param for target 'omega_ini_dcdm' */
-                                        "NEDE_trigger_mass"};       /* unknown param for target 'z_decay_NEDE' */
+                                        "NEDE_trigger_mass",        /* unknown param for target 'z_decay_NEDE' */
+                                        "NEDE_trigger_ini",         /* unknown param for target 'Omega0_NEDE_trigger_DM' */
+                                        "Omega0_NEDE_trigger_DM"};  /* unknown param for target 'NEDE_trigger_ini' */
 
   /* for each target, module up to which we need to run CLASS in order
      to compute the targetted quantities (not running the whole code
@@ -550,7 +554,9 @@ int input_shooting(struct file_content * pfc,
                                         cs_background,     /* computation stage for target 'Omega_scf' */
                                         cs_background,     /* computation stage for target 'Omega_ini_dcdm' */
                                         cs_background,     /* computation stage for target 'omega_ini_dcdm' */
-                                        cs_background};    /* computation stage for target 'z_decay_NEDE' */
+                                        cs_background,     /* computation stage for target 'z_decay_NEDE' */
+                                        cs_background,    /* computation stage for target 'Omega0_NEDE_trigger_DM' */
+                                        cs_background};    /* computation stage for target 'NEDE_trigger_ini' */
 
   struct fzerofun_workspace fzw;
 
@@ -560,8 +566,7 @@ int input_shooting(struct file_content * pfc,
   unknown_parameters_size = 0;
   fzw.required_computation_stage = 0;
   for (index_target = 0; index_target < _NUM_TARGETS_; index_target++){
-    if (index_target == 7) {
-      int a = 0;}
+    
     class_call(parser_read_double(pfc,target_namestrings[index_target],&param1,&flag1,errmsg),
                errmsg,
                errmsg);
@@ -1288,12 +1293,35 @@ int input_get_guess(double *xguess,
       dxdy[index_guess] = 2.43e-9/0.891;
       break;
       case z_decay_NEDE: {
+        // Need to guess NEDE_trigger_mass
         double Omega_M = ba.Omega0_cdm + ba.Omega0_b + ba.Omega0_ncdm_tot;
         double z_NEDE = pfzw->target_value[index_guess];
         double trigger_mass = 0.5 * ba.H0 / ba.Bubble_trigger_H_over_m * pow(1. / (1. - ba.f_NEDE), 0.5) * pow(Omega_M * pow((1. + z_NEDE), 3) + Omega_M * pow((1. + z_NEDE), 4) / (3001.) + (1. - Omega_M), 0.5);
         
         xguess[index_guess] = 0.5 * ba.H0 / ba.Bubble_trigger_H_over_m * pow(1. / (1. - ba.f_NEDE), 0.5) * pow(Omega_M * pow((1. + pfzw->target_value[index_guess]), 3) + Omega_M * pow((1. + pfzw->target_value[index_guess]), 4) / (3001.) + (1. - Omega_M), 0.5);
         dxdy[index_guess] = 0.5 * trigger_mass * (3. * Omega_M * pow((1. + z_NEDE), 2) + 4. * Omega_M * pow((1. + z_NEDE), 3) / (3001.)) / (Omega_M * pow((1. + z_NEDE), 3) + Omega_M * pow((1. + z_NEDE), 4) / (3001.) + (1. - Omega_M));
+        break;
+      }
+      case Omega0_NEDE_trigger_DM: {
+        // Need to guess NEDE_trigger_ini
+        double Omega_M = ba.Omega0_cdm + ba.Omega0_b + ba.Omega0_ncdm_tot;
+        double z_NEDE = ba.z_decay;
+        double trigger_mass = 0.5 * ba.H0 / ba.Bubble_trigger_H_over_m * pow(1. / (1. - ba.f_NEDE), 0.5) * pow(Omega_M * pow((1. + z_NEDE), 3) + Omega_M * pow((1. + z_NEDE), 4) / (3001.) + (1. - Omega_M), 0.5);
+        
+        xguess[index_guess] = pow(75. * ba.H0 * ba.H0 * pfzw->target_value[index_guess] * pow(z_NEDE, 3) / pow(trigger_mass, 2), 0.5);
+        dxdy[index_guess] = 0.5 * xguess[index_guess] / pfzw->target_value[index_guess];
+        break;
+      }
+      case NEDE_trigger_ini: {
+        // Need to guess Omega0_NEDE_trigger_DM
+        // Inversion the guess above
+        double Omega_M = ba.Omega0_cdm + ba.Omega0_b + ba.Omega0_ncdm_tot;
+        double z_NEDE = ba.z_decay;
+        double trigger_mass = 0.5 * ba.H0 / ba.Bubble_trigger_H_over_m * pow(1. / (1. - ba.f_NEDE), 0.5) * pow(Omega_M * pow((1. + z_NEDE), 3) + Omega_M * pow((1. + z_NEDE), 4) / (3001.) + (1. - Omega_M), 0.5);
+        
+        xguess[index_guess] = pow(pfzw->target_value[index_guess]*trigger_mass/ba.H0, 2.)/(75.*pow(z_NEDE, 3.));
+        dxdy[index_guess] = 2.*pfzw->target_value[index_guess]*pow(trigger_mass/ba.H0, 2.)/(75.*pow(z_NEDE, 3.)); // derivative of xguess
+        break;
       }
     }
   }
@@ -1507,18 +1535,6 @@ int input_try_unknown_parameters(double * unknown_parameter,
       output[i] = fo.sigma8[fo.index_pk_m]*sqrt(ba.Omega0_m/0.3);
       break;
       case z_decay_NEDE: {
-        /*NOTE TO SELF: COMPUTE ACTUAL z_DECAY FROM ba HERE. USE THE TRICK FROM CLASS_EDE!
-         ALSO NOTE TO SELF: CODE THE NEDE DYNAMCIS IN BG FUNCTIONS INSTEAD OF BG SOLVE.
-         NEDE DYNAMICS NEED TO BE ACTIVATED THER.
-         SHOULD ALSO CHECK IF TRIGGER DYNAMICS NEED EXPLICIT IMPLEMENTATION THERE.
-         
-         
-         To find the z value at decay:
-         Find the z at which H(z) < m_trigger*Bubble_trigger_HoverM
-         
-         
-         */
-        
         double z_decay = 0.;
         double H_decay = ba.NEDE_trigger_mass*ba.Bubble_trigger_H_over_m;
         for (int index_tau = 1; index_tau < ba.bt_size - 1; ++index_tau) {
@@ -1538,6 +1554,21 @@ int input_try_unknown_parameters(double * unknown_parameter,
         output[i] = z_decay - pfzw->target_value[i];
         if (input_verbose > 1) {
           printf("z_decay=%f, target=%f\n", z_decay, pfzw->target_value[i]);
+        }
+        break;
+      }
+      case Omega0_NEDE_trigger_DM: {
+        output[i] = ba.Omega0_trigger - pfzw->target_value[i];
+        if (input_verbose > 1) {
+          printf("Omega0_NEDE_trigger_DM=%f, target=%f\n", ba.Omega0_trigger, pfzw->target_value[i]);
+        }
+        break;
+      }
+      case NEDE_trigger_ini: {
+        double Omega0_trigger_today = ba.background_table[(ba.bt_size-1)*ba.bg_size+ba.index_bg_rho_trigger]/ba.H0/ba.H0;
+        output[i] = ba.Omega0_trigger - Omega0_trigger_today;
+        if (input_verbose > 1) {
+          printf("NEDE_trigger_ini=%f, target=%f\n", ba.NEDE_trigger_ini, pfzw->target_value[i]);
         }
         break;
       }
@@ -3181,17 +3212,17 @@ int input_read_parameters_species(struct file_content * pfc,
   }
   
   /** 7.3) New Early Dark Energy */
-  pba->has_NEDE = _FALSE_;
   class_read_double("f_NEDE", pba->f_NEDE);
-  class_read_double("z_decay_NEDE", pba->z_decay);
-  class_read_double("NEDE_trigger_mass", pba->NEDE_trigger_mass);
+  class_read_double("z_decay_NEDE", pba->z_decay);                  /* Related by shooting */
+  class_read_double("NEDE_trigger_mass", pba->NEDE_trigger_mass);   /*                     */
   class_read_double("three_eos_NEDE", pba->three_eos_NEDE);
   class_read_double("three_ceff2_NEDE", ppt->three_ceff2_NEDE);
   class_read_double("three_cvis2_NEDE", ppt->three_cvis2_NEDE);
   class_read_double("H_over_m_NEDE", pba->Bubble_trigger_H_over_m);
-  class_read_double("NEDE_trigger_ini", pba->NEDE_trigger_ini);
   class_read_double("Junction_tag", pba->Junction_tag);
   class_read_double("Omega0_NEDE", pba->Omega0_NEDE); // Omega today, is only used internally, when finding a better fit for z_decay.
+  class_read_double("NEDE_trigger_ini", pba->NEDE_trigger_ini);      /* Related by shooting */
+  class_read_double("Omega0_NEDE_trigger_DM", pba->Omega0_trigger);  /*                     */
 
   /* NEDE: Here we decide whether NEDE decays according to scenario A or B. Default: Scneario A*/
 
@@ -3229,30 +3260,27 @@ int input_read_parameters_species(struct file_content * pfc,
   }
 
   if ((pba->Omega_NEDE > 0) || (pba->f_NEDE > 0)) {
-    class_test(pba->z_decay == 0, errmsg,
-               "In input file, z_decay_NEDE  needs to be specified for NEDE (The trigger mass as input parameter has been retired in v5).");
-    
-    pba->has_NEDE = _TRUE_;
-
     if (pba->Omega_NEDE == 0)
       pba->Omega_NEDE = pba->f_NEDE * pow(pba->NEDE_trigger_mass * pba->Bubble_trigger_H_over_m / pba->H0, 2);
     else if (pba->f_NEDE == 0)
       pba->f_NEDE = pba->Omega_NEDE / pow(pba->NEDE_trigger_mass * pba->Bubble_trigger_H_over_m / pba->H0, 2);
-
-    if (pba->NEDE_trigger_ini != 0)
-    {
-      pba->phi_ini_trigger = pba->NEDE_trigger_ini;
-      pba->phi_prime_ini_trigger = 0; // This value is set to the attractor later.
-    }
+    
+    class_test(pba->z_decay == 0, errmsg,
+               "In input file, z_decay_NEDE  needs to be specified for NEDE (The trigger mass as input parameter has been retired in v5).");
 
     class_test(pba->f_NEDE > 0.4, errmsg,
                "Choose a smaller amount of NEDE as the code has not been tested for f_NEDE > 0.4.");
+    
+    class_test(pba->NEDE_trigger_ini < 0., errmsg,
+               "NEDE trigger field cannot run with negative initial value.");
+    
+    class_test(((pba->NEDE_trigger_ini == 0.) && (pba->Omega0_trigger == 0.)), errmsg,
+               "You must input either 'NEDE_trigger_ini' or 'Omega0_NEDE_trigger_DM' to set the trigger density.")
+
+    pba->phi_prime_ini_trigger = 0; // This value is set to the attractor later.
 
     if (pba->NEDE_fld_nature == NEDE_fld_A)
       pba->Omega0_NEDE = pba->Omega_NEDE * pow(1. / (1. + pba->z_decay), (3. + pba->three_eos_NEDE));
-
-    /*printf("h: %f, omega_b: %f, omega_cdm: %f, ns: %f, ln10^10As: %f, tau: %f, mass: %f \n", pba->h, pba->Omega0_b * pba->h * pba->h,
-           pba->Omega0_cdm * pba->h * pba->h, ppm->n_s, log(ppm->A_s / 1.e-10), pth->tau_reio);*/
   }
 
 
@@ -3334,6 +3362,12 @@ int input_read_parameters_species(struct file_content * pfc,
   Omega_tot += pba->Omega0_dcdmdr;
   Omega_tot += pba->Omega0_idr;
   Omega_tot += pba->Omega0_ncdm_tot;
+  
+  /* NEDE budget, both zero if no NEDE */
+  Omega_tot += pba->Omega0_NEDE;
+  Omega_tot += pba->Omega0_trigger;
+  printf("Omega0_NEDE=%g, Omega0_NEDE_trigger_DM=%g\n", pba->Omega0_NEDE, pba->Omega0_trigger);
+
   /* Step 1 */
   if (flag1 == _TRUE_){
     pba->Omega0_lambda = param1;
@@ -3369,10 +3403,6 @@ int input_read_parameters_species(struct file_content * pfc,
       printf(" -> matched budget equations by adjusting Omega_scf = %g\n",pba->Omega0_scf);
     }
   }
-  
-  /* NEDE budget, both zero if no NEDE */
-  Omega_tot += pba->Omega0_NEDE;
-  Omega_tot += pba->Omega0_trigger;
 
   /* ** END OF BUDGET EQUATION ** */
 
@@ -5945,10 +5975,10 @@ int input_default_params(struct background *pba,
   pba->Omega_NEDE = 0.;
   pba->f_NEDE = 0;
   pba->Omega0_NEDE = 0.;
-  pba->Omega0_trigger = 0.;
   pba->decay_flag = _FALSE_; // Initially the decay has not yet taken place.
   pba->Junction_tag = 1;     // Default: standard junction condition inferred from matching.
-  pba->NEDE_trigger_ini = 0.001;
+  pba->NEDE_trigger_ini = 0.;
+  pba->Omega0_trigger = 0.; // Default value
 
   pba->Bubble_trigger_H_over_m = .2; // Default value ionferred from miscroscpic model.
   pba->NEDE_trigger_mass = 0.;

@@ -347,6 +347,7 @@ struct background
   short has_NEDE;      /**< presence of NEDE? */
   short has_NEDE_pert; /**< presence of NEDE perturbations? */
   short has_NEDE_trigger; /**< presence of NEDE trigger? */
+  short has_NEDE_trigger_DM; /**< tracking trigger density? */
 
   //@}
 
@@ -484,6 +485,16 @@ extern "C" {
                                 double *w,
                                 double *dw_over_da,
                                 double *ca2);
+
+  int background_quantities_NEDE_trigger(
+      struct background *pba,
+      double a,
+      double a_prime_over_a,
+      double H,
+      double H_prime,
+      double *w,
+      double *dw_over_da,
+      double *ca2);
 
   int background_varconst_of_z(
                                struct background* pba,
