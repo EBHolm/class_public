@@ -525,23 +525,46 @@ int background_functions(
                            
   /* NEDE trigger field */
   if (pba->has_NEDE_trigger == _TRUE_) {
-   // if (-a_rel*0.99 <= pba->a_decay || pba->a_decay ==0 ) {
-   phi = pvecback_B[pba->index_bi_phi_trigger];
-   phi_prime = pvecback_B[pba->index_bi_phi_prime_trigger];
-   pvecback[pba->index_bg_phi_trigger] = phi;                                                    // value of the trigger field phi
-   pvecback[pba->index_bg_phi_prime_trigger] = phi_prime;                                        // value of the trigger field derivative wrt conformal time
-   pvecback[pba->index_bg_V_trigger] = V_trigger(pba, phi);                                      // V_scf(pba,phi); //write here potential as function of phi
-   pvecback[pba->index_bg_dV_trigger] = dV_trigger(pba, phi);                                    // dV_scf(pba,phi); //potential' as function of phi
-   pvecback[pba->index_bg_ddV_trigger] = ddV_trigger(pba, phi);                                  // ddV_scf(pba,phi); //potential'' as function of phi
-   pvecback[pba->index_bg_rho_trigger] = (phi_prime*phi_prime/(2*a*a) + V_trigger(pba, phi))/3.; // energy of the trigger field. The field units are set automatically by setting the initial conditions
-   pvecback[pba->index_bg_p_trigger] = (phi_prime*phi_prime/(2*a*a) - V_trigger(pba, phi))/3.;   // pressure of the trigger field
-   rho_tot += pvecback[pba->index_bg_rho_trigger];
-   p_tot += pvecback[pba->index_bg_p_trigger];
-   dp_dloga += 0.0; /** <-- This depends on a_prime_over_a, so we cannot add it now! */
-   // divide relativistic & nonrelativistic (not very meaningful for oscillatory models)
-   rho_r += 3.*pvecback[pba->index_bg_p_trigger];                                       // field pressure contributes radiation
-   rho_m += pvecback[pba->index_bg_rho_trigger] - 3.*pvecback[pba->index_bg_p_trigger]; // the rest contributes matter
-   // printf(" a= %e, Omega_scf = %f, \n ",a_rel, pvecback[pba->index_bg_rho_scf]/rho_tot );
+    if (a < pba->a_trigger_fluid) {
+      // This part is relevant before the fluid approximation is turned on.
+      phi = pvecback_B[pba->index_bi_phi_trigger];
+      phi_prime = pvecback_B[pba->index_bi_phi_prime_trigger];
+      pvecback[pba->index_bg_phi_trigger] = phi;                                                    // value of the trigger field phi
+      pvecback[pba->index_bg_phi_prime_trigger] = phi_prime;                                        // value of the trigger field derivative wrt conformal time
+      pvecback[pba->index_bg_V_trigger] = V_trigger(pba, phi);                                      // V_scf(pba,phi); //write here potential as function of phi
+      pvecback[pba->index_bg_dV_trigger] = dV_trigger(pba, phi);                                    // dV_scf(pba,phi); //potential' as function of phi
+      pvecback[pba->index_bg_ddV_trigger] = ddV_trigger(pba, phi);                                  // ddV_scf(pba,phi); //potential'' as function of phi
+      pvecback[pba->index_bg_rho_trigger] = (phi_prime*phi_prime/(2*a*a) + V_trigger(pba, phi))/3.; // energy of the trigger field. The field units are set automatically by setting the initial conditions
+      pvecback[pba->index_bg_p_trigger] = (phi_prime*phi_prime/(2*a*a) - V_trigger(pba, phi))/3.;   // pressure of the trigger field
+      rho_tot += pvecback[pba->index_bg_rho_trigger];
+      p_tot += pvecback[pba->index_bg_p_trigger];
+      dp_dloga += 0.0; /** <-- This depends on a_prime_over_a, so we cannot add it now! */
+      
+      // divide relativistic & nonrelativistic (not very meaningful for oscillatory models)
+      rho_r += 3.*pvecback[pba->index_bg_p_trigger];                                       // field pressure contributes radiation
+      rho_m += pvecback[pba->index_bg_rho_trigger] - 3.*pvecback[pba->index_bg_p_trigger]; // the rest contributes matter
+    }
+    else {
+      // This part is relevant after the fluid approximation has been turned on.
+      // We still fill the phi array with trivial values.
+      phi = pvecback_B[pba->index_bi_phi_trigger];
+      phi_prime = pvecback_B[pba->index_bi_phi_prime_trigger];
+      pvecback[pba->index_bg_phi_trigger] = phi;                   // value of the trigger field phi
+      pvecback[pba->index_bg_phi_prime_trigger] = phi_prime;       // value of the trigger field derivative wrt conformal time
+      pvecback[pba->index_bg_V_trigger] = V_trigger(pba, phi);     // V_scf(pba,phi); //write here potential as function of phi
+      pvecback[pba->index_bg_dV_trigger] = dV_trigger(pba, phi);   // dV_scf(pba,phi); //potential' as function of phi
+      pvecback[pba->index_bg_ddV_trigger] = ddV_trigger(pba, phi); // ddV_scf(pba,phi); //potential'' as function of phi
+
+      // Here we copy the fluid energy density from the integration vector and add it to rho_tot.
+      pvecback[pba->index_bg_rho_trigger] = pvecback_B[pba->index_bi_rho_trigger];
+
+      // And add it to the total energy density.
+      rho_tot += pvecback[pba->index_bg_rho_trigger];
+
+      // Everything else is added later after we have calculated H and H_prime below.
+      dp_dloga += 0.0;
+      p_tot += 0.0;
+    }
   }
 
   /* ncdm */
@@ -626,6 +649,25 @@ int background_functions(
     p_tot += (1./3.) * pvecback[pba->index_bg_rho_idr];
     rho_r += pvecback[pba->index_bg_rho_idr];
   }
+                           
+  if (pba->has_NEDE_trigger == _TRUE_) {
+   // NEDE: Here we calculate the pressure contribution of the Trigger field when we are in the fluid approximation.
+   if (a >= pba->a_trigger_fluid) {
+     double w_trigger;
+     class_call(background_quantities_NEDE_trigger(pba, a, a*pvecback[pba->index_bg_H], pvecback[pba->index_bg_H], 0, &w_trigger, NULL, NULL),
+                pba->error_message,
+                pba->error_message);
+
+     pvecback[pba->index_bg_p_trigger] = w_trigger * pvecback[pba->index_bg_rho_trigger]; // pressure of the trigger field
+     p_tot += pvecback[pba->index_bg_p_trigger];
+
+     dp_dloga += 0.0; // Add later after we have H_prime //(a * dw_over_da_trigger - 3 * (1 + w_trigger) * w_fld) * pvecback[pba->index_bg_rho_fld];
+
+     // divide relativistic & nonrelativistic (not very meaningful for oscillatory models)
+     rho_r += 3. * pvecback[pba->index_bg_p_trigger];                                       // field pressure contributes radiation
+     rho_m += pvecback[pba->index_bg_rho_trigger] - 3. * pvecback[pba->index_bg_p_trigger]; // the rest contributes matter
+   }
+  }
 
   /** - compute expansion rate H from Friedmann equation: this is the
       only place where the Friedmann equation is assumed. Remember
@@ -653,8 +695,20 @@ int background_functions(
                            
   if (pba->has_NEDE_trigger == _TRUE_) {
    /** The contribution of the trigger field was not added to dp_dloga, add p_scf_prime here: */
-   pvecback[pba->index_bg_p_prime_trigger] = pvecback[pba->index_bg_phi_prime_trigger]*(-pvecback[pba->index_bg_phi_prime_trigger]*pvecback[pba->index_bg_H]/a - 2./3.*pvecback[pba->index_bg_dV_trigger]);
-   pvecback[pba->index_bg_p_tot_prime] += pvecback[pba->index_bg_p_prime_trigger];
+    if (a < pba->a_trigger_fluid) {
+      pvecback[pba->index_bg_p_prime_trigger] = pvecback[pba->index_bg_phi_prime_trigger]*(-pvecback[pba->index_bg_phi_prime_trigger]*pvecback[pba->index_bg_H]/a - 2./3.*pvecback[pba->index_bg_dV_trigger]);
+      pvecback[pba->index_bg_p_tot_prime] += pvecback[pba->index_bg_p_prime_trigger];
+    }
+    else {
+      // Similarly in the fluid case.
+      double w_trigger, dw_over_da_trigger;
+      class_call(background_quantities_NEDE_trigger(pba, a, a*pvecback[pba->index_bg_H], pvecback[pba->index_bg_H], pvecback[pba->index_bg_H_prime], &w_trigger, &dw_over_da_trigger, NULL),
+                 pba->error_message,
+                 pba->error_message);
+      
+      double dp_dloga_trigger = (a*dw_over_da_trigger - 3.*(1. + w_trigger)*w_trigger)*pvecback[pba->index_bg_rho_trigger];
+      pvecback[pba->index_bg_p_tot_prime] += a*pvecback[pba->index_bg_H]*dp_dloga_trigger;
+    }
   }
 
   /** - compute critical density */
@@ -1152,14 +1206,8 @@ int background_indices(
   
   if (pba->f_NEDE != 0.) {
     pba->has_NEDE = _TRUE_;
+    pba->has_NEDE_trigger = _TRUE_;
     pba->has_NEDE_pert = _TRUE_;
-    /* Here we decide if we include a trigger field */
-    if (pba->NEDE_trigger_ini != 0.) {
-      pba->has_NEDE_trigger = _TRUE_;
-      if (pba->Omega0_trigger != 0.) {
-        pba->has_NEDE_trigger_DM = _TRUE_;
-      }
-    }
   }
 
   if (pba->Omega0_scf != 0.)
@@ -1363,6 +1411,7 @@ int background_indices(
    */
   class_define_index(pba->index_bi_phi_trigger, pba->has_NEDE_trigger, index_bi, 1);
   class_define_index(pba->index_bi_phi_prime_trigger, pba->has_NEDE_trigger, index_bi, 1);
+  class_define_index(pba->index_bi_rho_trigger, pba->has_NEDE_trigger, index_bi, 1);
 
   /* -> end of indices in the vector of variables to integrate */
   pba->bi_size = index_bi;
@@ -2465,6 +2514,7 @@ int background_initial_conditions(
     /* phi'_ini = -1/5 * phi_ini a^2 m^2  / (a H) where H = sqrt(rho) ins class conventions. */
     pvecback_integration[pba->index_bi_phi_trigger] = pba->NEDE_trigger_ini;
     pvecback_integration[pba->index_bi_phi_prime_trigger] = -1./5.*pba->NEDE_trigger_ini*pow(pba->NEDE_trigger_mass, 2)/pow(rho_rad, 0.5)*a;
+    pvecback_integration[pba->index_bi_rho_trigger] = 0.0;
     // printf("initial value: %e; \n",pvecback_integration[pba->index_bi_phi_prime_scf]);
   }
 
@@ -2897,10 +2947,45 @@ int background_derivs(
   }
   
   if (pba->has_NEDE_trigger == _TRUE_) {
+    if ((H < pba->trigger_fluid_H_over_m*pba->NEDE_trigger_mass) && (pba->a_trigger_fluid == 1.)) {
+      // Turn on trigger fluid approximation
+      pba->a_trigger_fluid = a;
+      
+      /* Here we implement the matching between the fluid and field description proposed in arXiv:2201.10238. We use Eq.8, Eq. 6 and Eq. 13 */
+      double phi_fluid = y[pba->index_bi_phi_trigger];
+      double phi_prime_fluid = y[pba->index_bi_phi_prime_trigger];
+
+      double factor = 6.*pow(pvecback[pba->index_bg_H], 2)/(9.*pow(pvecback[pba->index_bg_H], 4) - 4.*(4.*pow(pvecback[pba->index_bg_H], 2)* pow(pba->NEDE_trigger_mass, 2) + pow(pvecback[pba->index_bg_H_prime], 2) / pow(a, 2)));
+      double phi_c_p = factor*(4.*pvecback[pba->index_bg_H]*pba->NEDE_trigger_mass*phi_fluid + 3.*pow(pvecback[pba->index_bg_H], 2)*phi_prime_fluid/a/pba->NEDE_trigger_mass + 2.*pvecback[pba->index_bg_H_prime]*phi_prime_fluid/pow(a, 2)/pba->NEDE_trigger_mass);
+      double phi_s_p = factor*(3.*pow(pvecback[pba->index_bg_H], 2)*phi_fluid - 2.*pvecback[pba->index_bg_H_prime]/a*phi_fluid + 4.*pvecback[pba->index_bg_H]*phi_prime_fluid/a);
+      double phi_c = phi_fluid;
+      double phi_s = phi_prime_fluid/a/pba->NEDE_trigger_mass - phi_c_p;
+
+      double rho_tfa = 0.5*pow(pba->NEDE_trigger_mass, 2)*(phi_c*phi_c + phi_s*phi_s + 0.5*(phi_c_p*phi_c_p + phi_s_p*phi_s_p) - phi_c*phi_s_p + phi_s*phi_c_p);
+      rho_tfa /= 3.; // CLASS convention!
+
+      y[pba->index_bi_rho_trigger] = rho_tfa;
+
+      if (pba->background_verbose > 1) {
+        printf("Turned on NEDE fluid approximation at a=%g\n", a);
+      }
+    }
+    
+    dy[pba->index_bi_phi_trigger] = 0.;
+    dy[pba->index_bi_phi_prime_trigger] = 0.;
+    dy[pba->index_bi_rho_trigger] = 0.;
+    
     /** - Scalar field equation: \f$ \phi'' + 2 a H \phi' + a^2 dV = 0 \f$  (note H is wrt cosmic time) */
     /** Here transformed to derivatives wrt. loga through d/dloga = 1/(aH)*d/deta, with eta conformal time  */
-    dy[pba->index_bi_phi_trigger] = y[pba->index_bi_phi_prime_trigger]/a/H;
-    dy[pba->index_bi_phi_prime_trigger] = -2*y[pba->index_bi_phi_prime_trigger] - a*dV_trigger(pba, y[pba->index_bi_phi_trigger])/H;
+    if (a < pba->a_trigger_fluid) {
+      dy[pba->index_bi_phi_trigger] = y[pba->index_bi_phi_prime_trigger]/a/H;
+      dy[pba->index_bi_phi_prime_trigger] = -2*y[pba->index_bi_phi_prime_trigger] - a*dV_trigger(pba, y[pba->index_bi_phi_trigger])/H;
+    }
+    else {
+      double w_trigger, dw_over_da_trigger;
+      class_call(background_quantities_NEDE_trigger(pba, a, a*H, H, pvecback[pba->index_bg_H_prime], &w_trigger, &dw_over_da_trigger, NULL), pba->error_message, pba->error_message);
+      dy[pba->index_bi_rho_trigger] = -3.*(1. + w_trigger)*y[pba->index_bi_rho_trigger];
+    }
   }
 
   return _SUCCESS_;
