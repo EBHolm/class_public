@@ -105,6 +105,9 @@ struct background
   double three_eos_NEDE; /* NEDE e.o.s. (scenario A) */
   short decay_flag; /* NEDE decay flag; True iff NEDE has decayed */
 
+  double trigger_fluid_H_over_m; /* NEDE trigger fluid approximation threshold */
+  double a_trigger_fluid; /* Scale factor when trigger fluid approximation is turned on */
+
   /* NEDE decay time */
   double tau_decay;
   double a_decay;
@@ -309,6 +312,7 @@ struct background
   
   int index_bi_phi_trigger;       /**< {B} NEDE trigger scalar field value */
   int index_bi_phi_prime_trigger; /**< {B} NEDE trigger scalar field derivative wrt conformal time */
+  int index_bi_rho_trigger;       /**< {B} NEDE trigger energy density */
 
   int index_bi_time;    /**< {C} proper (cosmological) time in Mpc */
   int index_bi_rs;      /**< {C} sound horizon */

@@ -1314,7 +1314,7 @@ int input_get_guess(double *xguess,
       }
       case NEDE_trigger_ini: {
         // Need to guess Omega0_NEDE_trigger_DM
-        // Inversion the guess above
+        // Inversion of the guess above
         double Omega_M = ba.Omega0_cdm + ba.Omega0_b + ba.Omega0_ncdm_tot;
         double z_NEDE = ba.z_decay;
         double trigger_mass = 0.5 * ba.H0 / ba.Bubble_trigger_H_over_m * pow(1. / (1. - ba.f_NEDE), 0.5) * pow(Omega_M * pow((1. + z_NEDE), 3) + Omega_M * pow((1. + z_NEDE), 4) / (3001.) + (1. - Omega_M), 0.5);
