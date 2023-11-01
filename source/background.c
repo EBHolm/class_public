@@ -525,15 +525,18 @@ int background_functions(
                            
   /* NEDE trigger field */
   if (pba->has_NEDE_trigger == _TRUE_) {
+    phi = pvecback_B[pba->index_bi_phi_trigger];
+    phi_prime = pvecback_B[pba->index_bi_phi_prime_trigger];
+    pvecback[pba->index_bg_V_trigger] = V_trigger(pba, phi);     // V_scf(pba,phi); //write here potential as function of phi
+    pvecback[pba->index_bg_dV_trigger] = dV_trigger(pba, phi);   // dV_scf(pba,phi); //potential' as function of phi
+    pvecback[pba->index_bg_ddV_trigger] = ddV_trigger(pba, phi); // ddV_scf(pba,phi); //potential'' as function of phi
+    phi = pvecback_B[pba->index_bi_phi_trigger];
+    phi_prime = pvecback_B[pba->index_bi_phi_prime_trigger];
+    pvecback[pba->index_bg_phi_trigger] = phi;                   // value of the trigger field phi
+    pvecback[pba->index_bg_phi_prime_trigger] = phi_prime;       // value of the trigger field derivative wrt conformal time
+    
     if (a < pba->a_trigger_fluid) {
       // This part is relevant before the fluid approximation is turned on.
-      phi = pvecback_B[pba->index_bi_phi_trigger];
-      phi_prime = pvecback_B[pba->index_bi_phi_prime_trigger];
-      pvecback[pba->index_bg_phi_trigger] = phi;                                                    // value of the trigger field phi
-      pvecback[pba->index_bg_phi_prime_trigger] = phi_prime;                                        // value of the trigger field derivative wrt conformal time
-      pvecback[pba->index_bg_V_trigger] = V_trigger(pba, phi);                                      // V_scf(pba,phi); //write here potential as function of phi
-      pvecback[pba->index_bg_dV_trigger] = dV_trigger(pba, phi);                                    // dV_scf(pba,phi); //potential' as function of phi
-      pvecback[pba->index_bg_ddV_trigger] = ddV_trigger(pba, phi);                                  // ddV_scf(pba,phi); //potential'' as function of phi
       pvecback[pba->index_bg_rho_trigger] = (phi_prime*phi_prime/(2*a*a) + V_trigger(pba, phi))/3.; // energy of the trigger field. The field units are set automatically by setting the initial conditions
       pvecback[pba->index_bg_p_trigger] = (phi_prime*phi_prime/(2*a*a) - V_trigger(pba, phi))/3.;   // pressure of the trigger field
       rho_tot += pvecback[pba->index_bg_rho_trigger];
@@ -544,17 +547,12 @@ int background_functions(
       rho_r += 3.*pvecback[pba->index_bg_p_trigger];                                       // field pressure contributes radiation
       rho_m += pvecback[pba->index_bg_rho_trigger] - 3.*pvecback[pba->index_bg_p_trigger]; // the rest contributes matter
     }
+    else if (a == pba->a_trigger_fluid) {
+      /* Turn on fluid approximation by setting the matched density calculated in background_derivs */
+      pvecback[pba->index_bg_rho_trigger] = pba->rho_fluid;
+    }
     else {
       // This part is relevant after the fluid approximation has been turned on.
-      // We still fill the phi array with trivial values.
-      phi = pvecback_B[pba->index_bi_phi_trigger];
-      phi_prime = pvecback_B[pba->index_bi_phi_prime_trigger];
-      pvecback[pba->index_bg_phi_trigger] = phi;                   // value of the trigger field phi
-      pvecback[pba->index_bg_phi_prime_trigger] = phi_prime;       // value of the trigger field derivative wrt conformal time
-      pvecback[pba->index_bg_V_trigger] = V_trigger(pba, phi);     // V_scf(pba,phi); //write here potential as function of phi
-      pvecback[pba->index_bg_dV_trigger] = dV_trigger(pba, phi);   // dV_scf(pba,phi); //potential' as function of phi
-      pvecback[pba->index_bg_ddV_trigger] = ddV_trigger(pba, phi); // ddV_scf(pba,phi); //potential'' as function of phi
-
       // Here we copy the fluid energy density from the integration vector and add it to rho_tot.
       pvecback[pba->index_bg_rho_trigger] = pvecback_B[pba->index_bi_rho_trigger];
 
@@ -2965,6 +2963,7 @@ int background_derivs(
       rho_tfa /= 3.; // CLASS convention!
 
       y[pba->index_bi_rho_trigger] = rho_tfa;
+      pba->rho_fluid = rho_tfa;
 
       if (pba->background_verbose > 1) {
         printf("Turned on NEDE fluid approximation at a=%g\n", a);
