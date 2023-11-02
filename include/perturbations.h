@@ -31,6 +31,16 @@ enum rsa_idr_flags {rsa_idr_off, rsa_idr_on};
 enum ufa_flags {ufa_off, ufa_on};
 enum ncdmfa_flags {ncdmfa_off, ncdmfa_on};
 
+/* New EDE, before decay CCa_on, corresponding to no perts.*/
+enum CCa_flags {CCa_on, CCa_off};
+
+/*New EDE, we stop tracking NewEDE pert when sda_on*/
+enum sda_flags {sda_off, sda_on};
+
+/*New EDE, we apply trigger fluid approximation when tfa_on*/
+enum tfa_flags {tfa_off, tfa_on};
+enum tavg_flags {tavg_off, tavg_on};
+
 /* Nature of NEDE fluid, either effective rest-frame sound speed is tracking the adiabatic sound speed (adiabatic case) or it is constant. */
 enum NEDE_ceff_nature {NEDE_ceff_const, NEDE_ceff_tracking};
 
@@ -253,6 +263,7 @@ struct perturbations
   short has_source_delta_ur;   /**< do we need source for delta of ultra-relativistic neutrinos/relics? */
   short has_source_delta_ncdm; /**< do we need source for delta of all non-cold dark matter species (e.g. massive neutrinos)? */
   short has_source_delta_NEDE; /**< do we need source for delta of NEDE? */
+  short has_source_delta_trigger; /**< do we need source for delta from trigger field? */
   short has_source_theta_m;    /**< do we need source for theta of total matter? */
   short has_source_theta_cb;   /**< do we ALSO need source for theta of ONLY cdm and baryon? */
   short has_source_theta_tot;  /**< do we need source for theta total? */
@@ -268,6 +279,7 @@ struct perturbations
   short has_source_theta_ur;   /**< do we need source for theta of ultra-relativistic neutrinos/relics? */
   short has_source_theta_ncdm; /**< do we need source for theta of all non-cold dark matter species (e.g. massive neutrinos)? */
   short has_source_theta_NEDE; /**< do we need source for theta of NEDE? */
+  short has_source_theta_trigger; /**< do we need source for theta of trigger field? */
   short has_source_phi;        /**< do we need source for metric fluctuation phi? */
   short has_source_phi_prime;  /**< do we need source for metric fluctuation phi'? */
   short has_source_phi_plus_psi; /**< do we need source for metric fluctuation (phi+psi)? */
@@ -303,6 +315,7 @@ struct perturbations
   int index_tp_delta_idr; /**< index value for delta of interacting dark radiation */
   int index_tp_delta_ncdm1; /**< index value for delta of first non-cold dark matter species (e.g. massive neutrinos) */
   int index_tp_delta_NEDE;  /**< index value for delta of NEDE */
+  int index_tp_delta_trigger; /**< index value for delta of trigger field */
   int index_tp_perturbed_recombination_delta_temp;		/**< Gas temperature perturbation */
   int index_tp_perturbed_recombination_delta_chi;		/**< Inionization fraction perturbation */
 
@@ -321,6 +334,7 @@ struct perturbations
   int index_tp_theta_dr;    /**< index value for F1 of decay radiation */
   int index_tp_theta_ncdm1; /**< index value for theta of first non-cold dark matter species (e.g. massive neutrinos) */
   int index_tp_theta_NEDE; /**< index value for theta of NEDE */
+  int index_tp_theta_trigger; /**< index value for theta of trigger field */
 
   int index_tp_phi;          /**< index value for metric fluctuation phi */
   int index_tp_phi_prime;    /**< index value for metric fluctuation phi' */
@@ -485,6 +499,14 @@ struct perturbations_vector
   int index_pt_Gamma_fld;  /**< unique dark energy dynamical variable in PPF case */
   int index_pt_phi_scf;  /**< scalar field density */
   int index_pt_phi_prime_scf;  /**< scalar field velocity */
+  int index_pt_phi_trigger;       /**< trigger field density */
+  int index_pt_phi_prime_trigger; /**< trigger field velocity */
+  int index_pt_delta_trigger_fld;
+  int index_pt_theta_trigger_fld;
+  int index_pt_delta_trigger_cycle_integral;
+  int index_pt_theta_hat_trigger_cycle_integral;
+  int index_pt_delta_t_trigger_cycle_integral;
+  int index_pt_theta_hat_t_trigger_cycle_integral;
   int index_pt_delta_ur; /**< density of ultra-relativistic neutrinos/relics */
   int index_pt_theta_ur; /**< velocity of ultra-relativistic neutrinos/relics */
   int index_pt_shear_ur; /**< shear of ultra-relativistic neutrinos/relics */
@@ -499,6 +521,8 @@ struct perturbations_vector
   int index_pt_delta_NEDE;
   int index_pt_theta_NEDE;
   int index_pt_shear_NEDE;
+  int index_pt_delta_trigger;
+  int index_pt_rho_plus_p_theta_trigger;
 
   /* perturbed recombination */
   int index_pt_perturbed_recombination_delta_temp;		/**< Gas temperature perturbation */
@@ -642,6 +666,10 @@ struct perturbations_workspace
   int index_ap_rsa_idr; /**< index for dark radiation streaming approximation */
   int index_ap_ufa; /**< index for ur fluid approximation */
   int index_ap_ncdmfa; /**< index for ncdm fluid approximation */
+  int index_ap_CCa;        /**< index for New EDE approximation*/
+  int index_ap_sda;        /**< index for New EDE approximation*/
+  int index_ap_tfa;        /**< index for New EDE approximation*/
+  int index_ap_tavg;       /**< index for New EDE approximation*/
   int ap_size;      /**< number of relevant approximations for a given mode */
 
   int * approx;     /**< array of approximation flags holding at a given time: approx[index_ap] */
@@ -981,6 +1009,14 @@ extern "C" {
                                             struct perturbations_workspace * ppw,
                                             ErrorMsg error_message
                                             );
+
+int trigger_NEDE_cs2(
+                    struct background *pba,
+                    double a,
+                    double k,
+                    double H,
+                    double *cs2
+                     );
 
 #ifdef __cplusplus
 }

@@ -470,6 +470,8 @@ int perturbations_output_data(
           class_store_double(dataptr,tk[ppt->index_tp_delta_idm],ppt->has_source_delta_idm,storeidx);
           class_store_double(dataptr,tk[ppt->index_tp_delta_fld],ppt->has_source_delta_fld,storeidx);
           class_store_double(dataptr,tk[ppt->index_tp_delta_ur],ppt->has_source_delta_ur,storeidx);
+          class_store_double(dataptr,tk[ppt->index_tp_delta_NEDE],ppt->has_source_delta_NEDE,storeidx);
+          // class_store_double(dataptr,tk[ppt->index_tp_delta_trigger],ppt->has_source_delta_trigger,storeidx);
           class_store_double(dataptr,tk[ppt->index_tp_delta_idr],ppt->has_source_delta_idr,storeidx);
           if (pba->has_ncdm == _TRUE_){
             for (n_ncdm = 0; n_ncdm < pba->N_ncdm; n_ncdm++){
@@ -499,6 +501,8 @@ int perturbations_output_data(
           class_store_double(dataptr,tk[ppt->index_tp_theta_idm],ppt->has_source_theta_idm,storeidx);
           class_store_double(dataptr,tk[ppt->index_tp_theta_fld],ppt->has_source_theta_fld,storeidx);
           class_store_double(dataptr,tk[ppt->index_tp_theta_ur],ppt->has_source_theta_ur,storeidx);
+          class_store_double(dataptr,tk[ppt->index_tp_theta_NEDE],ppt->has_source_theta_NEDE,storeidx);
+          // class_store_double(dataptr,tk[ppt->index_tp_theta_trigger],ppt->has_source_theta_trigger,storeidx);
           class_store_double(dataptr,tk[ppt->index_tp_theta_idr],ppt->has_source_theta_idr,storeidx);
           if (pba->has_ncdm == _TRUE_){
             for (n_ncdm = 0; n_ncdm < pba->N_ncdm; n_ncdm++){
@@ -558,6 +562,7 @@ int perturbations_output_titles(
       class_store_columntitle(titles,"d_idm",pba->has_idm);
       class_store_columntitle(titles,"d_fld",pba->has_fld);
       class_store_columntitle(titles,"d_ur",pba->has_ur);
+      class_store_columntitle(titles,"d_NEDE",pba->has_NEDE_pert);
       class_store_columntitle(titles,"d_idr",pba->has_idr);
       if (pba->has_ncdm == _TRUE_) {
         for (n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++) {
@@ -568,6 +573,7 @@ int perturbations_output_titles(
       class_store_columntitle(titles,"d_dcdm",pba->has_dcdm);
       class_store_columntitle(titles,"d_dr",pba->has_dr);
       class_store_columntitle(titles,"d_scf",pba->has_scf);
+      // class_store_columntitle(titles,"d_trigger",pba->has_NEDE_trigger);
       class_store_columntitle(titles,"d_m",ppt->has_source_delta_m);
       class_store_columntitle(titles,"d_tot",ppt->has_source_delta_tot);
       class_store_columntitle(titles,"phi",ppt->has_source_phi);
@@ -587,6 +593,7 @@ int perturbations_output_titles(
       class_store_columntitle(titles,"t_idm",pba->has_idm);
       class_store_columntitle(titles,"t_fld",pba->has_fld);
       class_store_columntitle(titles,"t_ur",pba->has_ur);
+      class_store_columntitle(titles, "t_NEDE", pba->has_NEDE_pert);
       class_store_columntitle(titles,"t_idr",pba->has_idr);
       if (pba->has_ncdm == _TRUE_) {
         for (n_ncdm=0; n_ncdm < pba->N_ncdm; n_ncdm++) {
@@ -597,6 +604,7 @@ int perturbations_output_titles(
       class_store_columntitle(titles,"t_dcdm",pba->has_dcdm);
       class_store_columntitle(titles,"t_dr",pba->has_dr);
       class_store_columntitle(titles,"t_scf",pba->has_scf);
+      // class_store_columntitle(titles,"t_trigger",pba->has_NEDE_trigger);
       class_store_columntitle(titles,"t_tot",_TRUE_);
     }
   }
@@ -741,6 +749,17 @@ int perturbations_init(
   else {
     if (ppt->perturbations_verbose > 0)
       printf("Computing sources\n");
+  }
+  
+  if (pba->has_NEDE && ppt->perturbations_verbose > 1) {
+    printf("  -> NEDE perturbation details:\n");
+    if (ppt->NEDE_ceff_nature == NEDE_ceff_const)
+      printf("     -> 3*ceff2: %f (constant)\n", ppt->three_ceff2_NEDE);
+    else
+      printf("     -> ceff2 = ca2 (tracking) \n");
+    printf("     -> 3*cvis2: %f (constant) \n", ppt->three_cvis2_NEDE);
+    printf("     -> Junction_tag: %d \n", pba->Junction_tag);
+    printf("     -> NEDE sub-dominant condition: %e \n", ppr->sub_dom_cond);
   }
 
   class_test((ppt->gauge == synchronous) && (pba->has_cdm == _FALSE_),
@@ -1298,6 +1317,8 @@ int perturbations_indices(
   ppt->has_source_delta_scf = _FALSE_;
   ppt->has_source_delta_dr = _FALSE_;
   ppt->has_source_delta_ur = _FALSE_;
+  ppt->has_source_delta_NEDE = _FALSE_;
+  ppt->has_source_delta_trigger = _FALSE_;
   ppt->has_source_delta_idr = _FALSE_;
   ppt->has_source_delta_ncdm = _FALSE_;
   ppt->has_source_delta_tot = _FALSE_;
@@ -1313,6 +1334,8 @@ int perturbations_indices(
   ppt->has_source_theta_scf = _FALSE_;
   ppt->has_source_theta_dr = _FALSE_;
   ppt->has_source_theta_ur = _FALSE_;
+  ppt->has_source_theta_NEDE = _FALSE_;
+  ppt->has_source_theta_trigger = _FALSE_;
   ppt->has_source_theta_idr = _FALSE_;
   ppt->has_source_theta_ncdm = _FALSE_;
   ppt->has_source_theta_tot = _FALSE_;
@@ -1413,6 +1436,11 @@ int perturbations_indices(
           ppt->has_source_delta_dr = _TRUE_;
         if (pba->has_ncdm == _TRUE_)
           ppt->has_source_delta_ncdm = _TRUE_;
+        if (pba->has_NEDE == _TRUE_) {
+          ppt->has_source_delta_NEDE = _TRUE_;
+          ppt->has_source_delta_trigger = _TRUE_;
+        }
+        // No source for the subdom trigger field required.
         // Thanks to the following lines, (phi,psi) are also stored as sources
         // (Obtained directly in newtonian gauge, infereed from (h,eta) in synchronous gauge).
         // If density transfer functions are requested in the (default) CLASS format,
@@ -1510,6 +1538,7 @@ int perturbations_indices(
       class_define_index(ppt->index_tp_delta_dcdm, ppt->has_source_delta_dcdm,index_type,1);
       class_define_index(ppt->index_tp_delta_fld,  ppt->has_source_delta_fld, index_type,1);
       class_define_index(ppt->index_tp_delta_scf,  ppt->has_source_delta_scf, index_type,1);
+      // class_define_index(ppt->index_tp_delta_trigger,  ppt->has_source_delta_trigger, index_type,1);
       class_define_index(ppt->index_tp_delta_dr,   ppt->has_source_delta_dr,  index_type,1);
       class_define_index(ppt->index_tp_delta_ur,   ppt->has_source_delta_ur,  index_type,1);
       class_define_index(ppt->index_tp_delta_idr,  ppt->has_source_delta_idr, index_type,1);
@@ -1524,6 +1553,7 @@ int perturbations_indices(
       class_define_index(ppt->index_tp_theta_dcdm, ppt->has_source_theta_dcdm,index_type,1);
       class_define_index(ppt->index_tp_theta_fld,  ppt->has_source_theta_fld, index_type,1);
       class_define_index(ppt->index_tp_theta_scf,  ppt->has_source_theta_scf, index_type,1);
+      // class_define_index(ppt->index_tp_theta_trigger,  ppt->has_source_theta_trigger, index_type,1);
       class_define_index(ppt->index_tp_theta_dr,   ppt->has_source_theta_dr,  index_type,1);
       class_define_index(ppt->index_tp_theta_ur,   ppt->has_source_theta_ur,  index_type,1);
       class_define_index(ppt->index_tp_theta_idr,  ppt->has_source_theta_idr, index_type,1);
@@ -2866,6 +2896,10 @@ int perturbations_workspace_init(
     class_define_index(ppw->index_ap_ncdmfa,pba->has_ncdm,index_ap,1);
     class_define_index(ppw->index_ap_tca_idm_dr,pba->has_idr,index_ap,1);
     class_define_index(ppw->index_ap_rsa_idr,pba->has_idr,index_ap,1);
+    
+    class_define_index(ppw->index_ap_CCa, pba->has_NEDE, index_ap, 1);
+    class_define_index(ppw->index_ap_sda, pba->has_NEDE, index_ap, 1);
+    class_define_index(ppw->index_ap_tfa, pba->has_NEDE_trigger, index_ap, 1);
   }
 
   ppw->ap_size=index_ap;
@@ -2894,6 +2928,22 @@ int perturbations_workspace_init(
     }
     if (pba->has_ncdm == _TRUE_) {
       ppw->approx[ppw->index_ap_ncdmfa]=(int)ncdmfa_off;
+    }
+
+    /*New EDE: Define different evolution phases*/
+    if (pba->has_NEDE_pert == _TRUE_) {
+      /*CCa_on: NEDE is decribed as a constant without fluctuations.*/
+      /*CCa_off: NEDE is decribed as a fluid with fluctuations.*/
+      ppw->approx[ppw->index_ap_CCa] = (int)CCa_on;
+
+      if (pba->has_NEDE_trigger) {
+        ppw->approx[ppw->index_ap_tfa] = (int)tfa_off;
+      }
+    }
+    if (pba->has_NEDE_pert == _TRUE_) {
+      /*sda_on: NEDE has decayed sufficiently far that we do not need to track its perturbations. As a conservative condition we use that rho_EDE/rho_tot < 10^(-6).*/
+      /*sda_off: NEDE is not yet subdominant and we therefore need to track its perturbations.*/
+      ppw->approx[ppw->index_ap_sda] = (int)sda_off;
     }
   }
 
@@ -3413,6 +3463,10 @@ int perturbations_prepare_k_output(struct background * pba,
       class_store_columntitle(ppt->scalar_titles,"delta_ur",pba->has_ur);
       class_store_columntitle(ppt->scalar_titles,"theta_ur",pba->has_ur);
       class_store_columntitle(ppt->scalar_titles,"shear_ur",pba->has_ur);
+      /* NEDE*/
+      class_store_columntitle(ppt->scalar_titles, "delta_NEDE", pba->has_NEDE_pert);
+      class_store_columntitle(ppt->scalar_titles, "theta_NEDE", pba->has_NEDE_pert);
+      class_store_columntitle(ppt->scalar_titles, "shear_NEDE", pba->has_NEDE_pert);
       /* Interacting dark radiation */
       class_store_columntitle(ppt->scalar_titles,"delta_idr",pba->has_idr);
       class_store_columntitle(ppt->scalar_titles,"theta_idr",pba->has_idr);
@@ -3447,6 +3501,9 @@ int perturbations_prepare_k_output(struct background * pba,
       /* Scalar field scf */
       class_store_columntitle(ppt->scalar_titles, "delta_scf", pba->has_scf);
       class_store_columntitle(ppt->scalar_titles, "theta_scf", pba->has_scf);
+      /* NEDE: Trigger field*/
+      class_store_columntitle(ppt->scalar_titles, "delta_trigger", pba->has_NEDE_trigger);
+      class_store_columntitle(ppt->scalar_titles, "theta_hat_trigger", pba->has_NEDE_trigger);
       /** Fluid */
       class_store_columntitle(ppt->scalar_titles, "delta_rho_fld", pba->has_fld);
       class_store_columntitle(ppt->scalar_titles, "rho_plus_p_theta_fld", pba->has_fld);
@@ -3829,6 +3886,19 @@ int perturbations_find_approximation_switches(
               fprintf(stdout,"Mode k=%e: will switch on ncdm fluid approximation at tau=%e\n",k,interval_limit[index_switch]);
             }
           }
+          if (pba->has_NEDE_pert == _TRUE_) {
+            /* Here we check when the phase transition has occurred */
+            if ((interval_approx[index_switch - 1][ppw->index_ap_CCa] == (int)CCa_on) &&
+                (interval_approx[index_switch][ppw->index_ap_CCa] == (int)CCa_off)) {
+              fprintf(stdout, "Mode k=%e: will create decaying NEDE mode at tau=%e\n", k, interval_limit[index_switch]);
+            }
+            if (pba->has_NEDE_trigger_DM) {
+              if ((interval_approx[index_switch - 1][ppw->index_ap_tfa] == (int)tfa_off) &&
+                  (interval_approx[index_switch][ppw->index_ap_tfa] == (int)tfa_on)) {
+                fprintf(stdout, "Mode k=%e: will switch on trigger fluid approximation at tau=%e\n", k, interval_limit[index_switch]);
+              }
+            }
+          }
         }
 
         if (_tensors_) {
@@ -4040,6 +4110,31 @@ int perturbations_vector_init(
 
     class_define_index(ppv->index_pt_phi_scf,pba->has_scf,index_pt,1); /* scalar field density */
     class_define_index(ppv->index_pt_phi_prime_scf,pba->has_scf,index_pt,1); /* scalar field velocity */
+    
+    /* Here we allocate memory for the variables to be integrated depending on NEDE phase */
+    if (pba->has_NEDE_pert == _TRUE_) {
+      if (pba->has_NEDE_trigger == _TRUE_) {
+        if ((ppw->approx[ppw->index_ap_CCa] == (int)CCa_on) || ((pba->has_NEDE_trigger_DM == _TRUE_) && (ppw->approx[ppw->index_ap_tfa] == (int)tfa_off))) {
+          /* trigger field density */
+          class_define_index(ppv->index_pt_phi_trigger, pba->has_NEDE_trigger, index_pt, 1);
+          /* trigger field velocity */
+          class_define_index(ppv->index_pt_phi_prime_trigger, pba->has_NEDE_trigger, index_pt, 1);
+        }
+        else if ((pba->has_NEDE_trigger_DM == _TRUE_) && (ppw->approx[ppw->index_ap_tfa] == (int)tfa_on)) {
+          class_define_index(ppv->index_pt_delta_trigger_fld, pba->has_NEDE_trigger_DM, index_pt, 1);
+          class_define_index(ppv->index_pt_theta_trigger_fld, pba->has_NEDE_trigger_DM, index_pt, 1);
+        }
+      }
+      /* NEDE: Only track perturbations in NEDE fluid after decay and before NEDE is highly subdominant */
+      if ((ppw->approx[ppw->index_ap_CCa] == (int)CCa_off) && (ppw->approx[ppw->index_ap_sda] == (int)sda_off)) {
+        /* NEDE pert density */
+        class_define_index(ppv->index_pt_delta_NEDE, _TRUE_, index_pt, 1);
+        /* NEDE pert velocity */
+        class_define_index(ppv->index_pt_theta_NEDE, _TRUE_, index_pt, 1);
+        /* NEDE pert sehar */
+        class_define_index(ppv->index_pt_shear_NEDE, _TRUE_, index_pt, 1);
+      }
+    }
 
     /* perturbed recombination: the indices are defined once tca is off. */
     if ( (ppt->has_perturbed_recombination == _TRUE_) && (ppw->approx[ppw->index_ap_tca] == (int)tca_off) ){
@@ -4374,19 +4469,27 @@ int perturbations_vector_init(
                    "scalar initial conditions assume ur fluid approximation turned off");
 
       }
-
+      
+      /* NEDE: Check that all modes are being initizalized before the transition */
+      if (pba->has_NEDE_pert == _TRUE_) {
+        class_test(ppw->approx[ppw->index_ap_CCa] == (int)CCa_off,
+                   ppt->error_message,
+                   "scalar initial conditions assume that phase transition in NEDE has not yet occurred");
+        if (pba->has_NEDE_trigger == _TRUE_) {
+          class_test(ppw->approx[ppw->index_ap_sda] == (int)sda_on,
+                     ppt->error_message,
+                     "The tag sda_on should only be set after the transition");
+        }
+      }
+      
       if (pba->has_ncdm == _TRUE_) {
-
         class_test(ppw->approx[ppw->index_ap_ncdmfa] == (int)ncdmfa_on,
                    ppt->error_message,
                    "scalar initial conditions assume ncdm fluid approximation turned off");
-
       }
-
       class_test(ppw->approx[ppw->index_ap_tca] == (int)tca_off,
                  ppt->error_message,
                  "scalar initial conditions assume tight-coupling approximation turned on");
-
     }
 
     if (_tensors_) {

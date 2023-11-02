@@ -596,6 +596,11 @@ class_precision_parameter(tol_sd_detector,double,1.e-5)
 
 class_string_parameter(sd_external_path,"/external/distortions","sd_external_path")
 
+/*
+ NEDE precision settings
+ */
+class_precision_parameter(sub_dom_cond,double,0) 
+
 #undef class_precision_parameter
 #undef class_string_parameter
 #undef class_type_parameter
