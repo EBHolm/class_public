@@ -549,11 +549,14 @@ int evolver_ndf15(
       }
     }
     /** Output **/
+    int output_return;
     while ((next<tres)&&(tdir * (tnew - t_vec[next]) >= 0.0)){
       /* Do we need to write output? */
       if (tnew==t_vec[next]){
-        class_call((*output)(t_vec[next],ynew+1,f0+1,next,parameters_and_workspace_for_derivs,error_message),
-                   error_message,error_message);
+        
+        output_return = output(t_vec[next],ynew+1,f0+1,next,parameters_and_workspace_for_derivs,error_message);
+        // class_call((*output)(t_vec[next],ynew+1,f0+1,next,parameters_and_workspace_for_derivs,error_message),
+        //           error_message,error_message);
 // MODIFICATION BY LUC
 // All print_variables have been moved to the end of time step
 /*
@@ -567,11 +570,23 @@ int evolver_ndf15(
       else {
         /*Interpolate if we have overshot sample values*/
         interp_from_dif(t_vec[next],tnew,ynew,h,dif,k,yinterp,ypinterp,yppinterp,interpidx,neq,2);
-
-        class_call((*output)(t_vec[next],yinterp+1,ypinterp+1,next,parameters_and_workspace_for_derivs,
-                   error_message),error_message,error_message);
+        
+        output_return = output(t_vec[next],ynew+1,f0+1,next,parameters_and_workspace_for_derivs,error_message);
+        // class_call((*output)(t_vec[next],yinterp+1,ypinterp+1,next,parameters_and_workspace_for_derivs,
+        //            error_message),error_message,error_message);
 
       }
+      
+      if (output_return == _FAILURE_) {
+          // Cast CLASS error message by mimicing the class_call macro
+          class_call_message(error_message, output, error_message)
+          return _FAILURE_;
+      }
+      else if (output_return == _APPROXIMATION_REACHED_) {
+        // Early stopping due to turning on approximation
+        done = _TRUE_;
+      }
+      
       next++;
     }
     /** End of output **/

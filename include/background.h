@@ -106,8 +106,8 @@ struct background
   short decay_flag; /* NEDE decay flag; True iff NEDE has decayed */
 
   double trigger_fluid_H_over_m; /* NEDE trigger fluid approximation threshold */
+  int trigger_fluid_approximation; /* True iff trigger fluid approximation is on */
   double a_trigger_fluid; /* Scale factor when trigger fluid approximation is turned on */
-  double rho_fluid; /* Energy density when trigger fluid approximation is turned on */
 
   /* NEDE decay time */
   double tau_decay;

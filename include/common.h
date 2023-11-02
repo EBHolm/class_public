@@ -24,6 +24,7 @@
 
 #define _SUCCESS_ 0 /**< integer returned after successful call of a function */
 #define _FAILURE_ 1 /**< integer returned after failure in a function */
+#define _APPROXIMATION_REACHED_ 2 /**< integer returned after reaching the threshold of a background approximation */
 
 #define _ERRORMSGSIZE_ 2048 /**< generic error messages are cut beyond this number of characters */
 typedef char ErrorMsg[_ERRORMSGSIZE_]; /**< Generic error messages (there is such a field in each structure) */
