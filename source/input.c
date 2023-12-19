@@ -2536,6 +2536,25 @@ int input_read_parameters_species(struct file_content * pfc,
   /** 5.a) Number of non-cold relics */
   /* Read */
   class_read_int("N_ncdm",N_ncdm);
+  int collective_ncdm = 0;
+  pba->collective_ncdm_N = 0;
+  class_read_int("collective_ncdm", collective_ncdm);
+  if (collective_ncdm != 0) {
+    pba->collective_ncdm = _TRUE_;
+  }
+  else {
+    pba->collective_ncdm = _FALSE_;
+  }
+  
+  int output_ncdm_binning = 0;
+  class_read_int("output_ncdm_binning", output_ncdm_binning);
+  if (collective_ncdm != 0) {
+    pba->output_ncdm_binning = _TRUE_;
+  }
+  else {
+    pba->output_ncdm_binning = _FALSE_;
+  }
+  
   /* Complete set of parameters */
   if (N_ncdm > 0){
     pba->N_ncdm = N_ncdm;
@@ -2556,6 +2575,9 @@ int input_read_parameters_species(struct file_content * pfc,
       }
     }
     if (fileentries > 0) {
+      if (pba->collective_ncdm == _TRUE_) {
+        class_test(_TRUE_, errmsg, "You cannot use psd files with collective_ncdm.");
+      }
 
       /** 5.b.1) Check if filenames for interpolation tables are given */
       /* Read */
@@ -2582,6 +2604,7 @@ int input_read_parameters_species(struct file_content * pfc,
     class_read_list_of_doubles_or_default("Omega_ncdm",pba->Omega0_ncdm,0.0,N_ncdm);
     class_read_list_of_doubles_or_default("omega_ncdm",pba->M_ncdm,0.0,N_ncdm);
     for (n=0; n<N_ncdm; n++){
+      class_test(((pba->collective_ncdm == _TRUE_) && (pba->m_ncdm_in_eV[n] == 0)), errmsg, "You must input m_ncdm when using the collective_ncdm feature.")
       if (pba->M_ncdm[n]!=0.0){
         /* Test */
         class_test(pba->Omega0_ncdm[n]!=0,errmsg,
@@ -2589,6 +2612,7 @@ int input_read_parameters_species(struct file_content * pfc,
         /* Complete set of parameters */
         pba->Omega0_ncdm[n] = pba->M_ncdm[n]/pba->h/pba->h;
       }
+      
       /* Set default value
          this is the right place for passing the default value of the mass
          (all parameters must have a default value; most of them are defined
@@ -2643,6 +2667,14 @@ int input_read_parameters_species(struct file_content * pfc,
     else {
       class_read_list_of_integers_or_default("ncdm_N_momentum_bins", pba->ncdm_input_q_size, 150, N_ncdm);
     }
+    
+    // Collapse all species into a single species
+    if (pba->collective_ncdm == _TRUE_) {
+      // Set N_ncdm back to 1 to only use one hierarchy
+      pba->collective_ncdm_N = N_ncdm;
+      N_ncdm = 1;
+      pba->N_ncdm = 1;
+    }
 
     /** Last step of 5) (i.e. NCDM) -- Calculate the masses and momenta */
     class_call(background_ncdm_init(ppr,pba),
@@ -2681,7 +2713,7 @@ int input_read_parameters_species(struct file_content * pfc,
           pba->deg_ncdm[n] *=fnu_factor;
         }
       }
-      else{
+      else {
         /* Case of only Omega/omega: */
         class_call(background_ncdm_M_from_Omega(ppr,pba,n),
                    pba->error_message,

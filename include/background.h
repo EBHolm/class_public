@@ -89,6 +89,10 @@ struct background
   /* the following parameters help to define the analytical ncdm phase space distributions (p-s-d) */
   double * ncdm_psd_parameters;          /**< list of parameters for specifying/modifying ncdm p.s.d.'s, to be customized for given model
                                             (could be e.g. mixing angles) */
+  int output_ncdm_binning;
+  int collective_ncdm;                   /**< regards all neutrinos as having the same distribution function,
+                                              thus solving only one hierarcy */
+  int collective_ncdm_N;                 /**< amount of collective ncdm species */
   double * M_ncdm;                       /**< vector of masses of non-cold relic: dimensionless ratios m_ncdm/T_ncdm */
   double * m_ncdm_in_eV;                 /**< list of ncdm masses in eV (inferred from M_ncdm and other parameters above) */
   double * Omega0_ncdm, Omega0_ncdm_tot; /**< Omega0_ncdm for each species and for the total Omega0_ncdm */
@@ -189,6 +193,8 @@ struct background
   int index_bg_rho_ncdm1;     /**< density of first ncdm species (others contiguous) */
   int index_bg_p_ncdm1;       /**< pressure of first ncdm species (others contiguous) */
   int index_bg_pseudo_p_ncdm1;/**< another statistical momentum useful in ncdma approximation */
+  int index_bg_q_ncdm1;
+  int index_bg_w_ncdm1;
 
   int index_bg_rho_tot;       /**< Total density */
   int index_bg_p_tot;         /**< Total pressure */
