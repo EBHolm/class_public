@@ -2548,7 +2548,7 @@ int input_read_parameters_species(struct file_content * pfc,
   
   int output_ncdm_binning = 0;
   class_read_int("output_ncdm_binning", output_ncdm_binning);
-  if (collective_ncdm != 0) {
+  if (output_ncdm_binning != 0) {
     pba->output_ncdm_binning = _TRUE_;
   }
   else {

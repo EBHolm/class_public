@@ -513,11 +513,13 @@ int background_functions(
                  pba->error_message,
                  pba->error_message);
       
-      for (int index_q = 0; index_q < pba->q_size_ncdm_bg[n_ncdm]; index_q++) {
-        int q_size = pba->q_size_ncdm_bg[n_ncdm];
-        pvecback[pba->index_bg_q_ncdm1 + cumulative_q_size + index_q] = pba->q_ncdm_bg[n_ncdm][index_q];
-        pvecback[pba->index_bg_w_ncdm1 + cumulative_q_size + index_q] = pba->w_ncdm_bg[n_ncdm][index_q];
-        cumulative_q_size += q_size;
+      if (pba->output_ncdm_binning == _TRUE_) {
+        for (int index_q = 0; index_q < pba->q_size_ncdm_bg[n_ncdm]; index_q++) {
+          int q_size = pba->q_size_ncdm_bg[n_ncdm];
+          pvecback[pba->index_bg_q_ncdm1 + cumulative_q_size + index_q] = pba->q_ncdm_bg[n_ncdm][index_q];
+          pvecback[pba->index_bg_w_ncdm1 + cumulative_q_size + index_q] = pba->w_ncdm_bg[n_ncdm][index_q];
+          cumulative_q_size += q_size;
+        }
       }
 
       pvecback[pba->index_bg_rho_ncdm1+n_ncdm] = rho_ncdm;
@@ -1234,7 +1236,7 @@ int background_ncdm_distribution(
   param = pba->ncdm_psd_parameters; /* extract the optional parameter list from it */
   n_ncdm = pbadist_local->n_ncdm;   /* extract index of ncdm species under consideration */
   ksi = pba->ksi_ncdm[n_ncdm];      /* extract chemical potential */
-  double test = 1.0/pow(2*_PI_,3)*(1./(exp(q-ksi)+1.) +1./(exp(q+ksi)+1.));
+
   /** - shall we interpolate in file, or shall we use analytical formula below? */
 
   /** - a) deal first with the case of interpolating in files */
@@ -1348,7 +1350,7 @@ int background_ncdm_distribution(
       }
     } /* end of region not used, but shown as an example */
   }
-  // printf("test/one_dist=%g \n", test/ *f0);
+
   return _SUCCESS_;
 }
 
