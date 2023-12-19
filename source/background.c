@@ -514,12 +514,12 @@ int background_functions(
                  pba->error_message);
       
       if (pba->output_ncdm_binning == _TRUE_) {
+        int q_size = pba->q_size_ncdm_bg[n_ncdm];
         for (int index_q = 0; index_q < pba->q_size_ncdm_bg[n_ncdm]; index_q++) {
-          int q_size = pba->q_size_ncdm_bg[n_ncdm];
           pvecback[pba->index_bg_q_ncdm1 + cumulative_q_size + index_q] = pba->q_ncdm_bg[n_ncdm][index_q];
           pvecback[pba->index_bg_w_ncdm1 + cumulative_q_size + index_q] = pba->w_ncdm_bg[n_ncdm][index_q];
-          cumulative_q_size += q_size;
         }
+        cumulative_q_size += q_size;
       }
 
       pvecback[pba->index_bg_rho_ncdm1+n_ncdm] = rho_ncdm;
@@ -2476,9 +2476,9 @@ int background_output_titles(
       class_store_columntitle(titles,tmp,_TRUE_);
       if (pba->output_ncdm_binning == _TRUE_) {
         for (int index_q = 0; index_q < pba->q_size_ncdm_bg[n]; index_q++) {
-          sprintf(tmp,"(.)q_ncdm[%d][%d]",n,index_q);
+          sprintf(tmp,"q_ncdm[%d][%d]",n,index_q);
           class_store_columntitle(titles,tmp,_TRUE_);
-          sprintf(tmp,"(.)w_ncdm[%d][%d]",n,index_q);
+          sprintf(tmp,"w_ncdm[%d][%d]",n,index_q);
           class_store_columntitle(titles,tmp,_TRUE_);
         }
       }
@@ -2557,12 +2557,12 @@ int background_output_data(
         class_store_double(dataptr,pvecback[pba->index_bg_p_ncdm1+n],_TRUE_,storeidx);
         if (pba->output_ncdm_binning == _TRUE_) {
           int cumulative_size = 0;
+          int q_size = pba->q_size_ncdm_bg[n];
           for (int index_q = 0; index_q < pba->q_size_ncdm_bg[n]; index_q++) {
-            int q_size = pba->q_size_ncdm_bg[n];
             class_store_double(dataptr,pvecback[pba->index_bg_q_ncdm1 + cumulative_size + index_q],_TRUE_,storeidx);
             class_store_double(dataptr,pvecback[pba->index_bg_w_ncdm1 + cumulative_size + index_q],_TRUE_,storeidx);
-            cumulative_size += q_size;
           }
+          cumulative_size += q_size;
         }
       }
     }
