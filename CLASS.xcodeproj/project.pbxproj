@@ -54,6 +54,36 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		8D7F31462AF25AAF000AB359 /* macros_precision.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = macros_precision.h; sourceTree = "<group>"; };
+		8D7F31472AF25AAF000AB359 /* hermite6_interpolation_csource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hermite6_interpolation_csource.h; sourceTree = "<group>"; };
+		8D7F31482AF25AAF000AB359 /* input.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = input.h; sourceTree = "<group>"; };
+		8D7F31492AF25AAF000AB359 /* dei_rkck.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dei_rkck.h; sourceTree = "<group>"; };
+		8D7F314A2AF25AAF000AB359 /* background.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = background.h; sourceTree = "<group>"; };
+		8D7F314B2AF25AAF000AB359 /* quadrature.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = quadrature.h; sourceTree = "<group>"; };
+		8D7F314C2AF25AAF000AB359 /* primordial.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = primordial.h; sourceTree = "<group>"; };
+		8D7F314D2AF25AAF000AB359 /* growTable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = growTable.h; sourceTree = "<group>"; };
+		8D7F314E2AF25AAF000AB359 /* distortions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = distortions.h; sourceTree = "<group>"; };
+		8D7F314F2AF25AAF000AB359 /* parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = parser.h; sourceTree = "<group>"; };
+		8D7F31502AF25AAF000AB359 /* evolver_ndf15.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = evolver_ndf15.h; sourceTree = "<group>"; };
+		8D7F31512AF25AAF000AB359 /* evolver_rkck.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = evolver_rkck.h; sourceTree = "<group>"; };
+		8D7F31522AF25AAF000AB359 /* trigonometric_integrals.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = trigonometric_integrals.h; sourceTree = "<group>"; };
+		8D7F31532AF25AAF000AB359 /* output.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = output.h; sourceTree = "<group>"; };
+		8D7F31542AF25AAF000AB359 /* hermite3_interpolation_csource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hermite3_interpolation_csource.h; sourceTree = "<group>"; };
+		8D7F31552AF25AAF000AB359 /* lensing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lensing.h; sourceTree = "<group>"; };
+		8D7F31562AF25AAF000AB359 /* arrays.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = arrays.h; sourceTree = "<group>"; };
+		8D7F31572AF25AAF000AB359 /* common.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
+		8D7F31582AF25AAF000AB359 /* perturbations.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = perturbations.h; sourceTree = "<group>"; };
+		8D7F31592AF25AAF000AB359 /* class.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = class.h; sourceTree = "<group>"; };
+		8D7F315A2AF25AAF000AB359 /* fourier.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fourier.h; sourceTree = "<group>"; };
+		8D7F315B2AF25AAF000AB359 /* precisions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = precisions.h; sourceTree = "<group>"; };
+		8D7F315C2AF25AAF000AB359 /* transfer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = transfer.h; sourceTree = "<group>"; };
+		8D7F315D2AF25AAF000AB359 /* svnversion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = svnversion.h; sourceTree = "<group>"; };
+		8D7F315E2AF25AAF000AB359 /* sparse.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sparse.h; sourceTree = "<group>"; };
+		8D7F315F2AF25AAF000AB359 /* hyperspherical.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hyperspherical.h; sourceTree = "<group>"; };
+		8D7F31602AF25AAF000AB359 /* hermite4_interpolation_csource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hermite4_interpolation_csource.h; sourceTree = "<group>"; };
+		8D7F31612AF25AAF000AB359 /* thermodynamics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = thermodynamics.h; sourceTree = "<group>"; };
+		8D7F31622AF25AAF000AB359 /* harmonic.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = harmonic.h; sourceTree = "<group>"; };
+		8D7F31632AF27E26000AB359 /* test.ini */ = {isa = PBXFileReference; lastKnownFileType = text; path = test.ini; sourceTree = "<group>"; };
 		AF089BBD27BD516E004D8CB6 /* distortions.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = distortions.c; sourceTree = "<group>"; };
 		AF089BC127BD5191004D8CB6 /* history.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = history.c; sourceTree = "<group>"; };
 		AF089BC327BD5191004D8CB6 /* energy_injection.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = energy_injection.c; sourceTree = "<group>"; };
@@ -112,6 +142,42 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8D7F31452AF25AAF000AB359 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				8D7F31562AF25AAF000AB359 /* arrays.h */,
+				8D7F314A2AF25AAF000AB359 /* background.h */,
+				8D7F31592AF25AAF000AB359 /* class.h */,
+				8D7F31572AF25AAF000AB359 /* common.h */,
+				8D7F31492AF25AAF000AB359 /* dei_rkck.h */,
+				8D7F314E2AF25AAF000AB359 /* distortions.h */,
+				8D7F31502AF25AAF000AB359 /* evolver_ndf15.h */,
+				8D7F31512AF25AAF000AB359 /* evolver_rkck.h */,
+				8D7F315A2AF25AAF000AB359 /* fourier.h */,
+				8D7F314D2AF25AAF000AB359 /* growTable.h */,
+				8D7F31622AF25AAF000AB359 /* harmonic.h */,
+				8D7F31542AF25AAF000AB359 /* hermite3_interpolation_csource.h */,
+				8D7F31602AF25AAF000AB359 /* hermite4_interpolation_csource.h */,
+				8D7F31472AF25AAF000AB359 /* hermite6_interpolation_csource.h */,
+				8D7F315F2AF25AAF000AB359 /* hyperspherical.h */,
+				8D7F31482AF25AAF000AB359 /* input.h */,
+				8D7F31552AF25AAF000AB359 /* lensing.h */,
+				8D7F31462AF25AAF000AB359 /* macros_precision.h */,
+				8D7F31532AF25AAF000AB359 /* output.h */,
+				8D7F314F2AF25AAF000AB359 /* parser.h */,
+				8D7F31582AF25AAF000AB359 /* perturbations.h */,
+				8D7F315B2AF25AAF000AB359 /* precisions.h */,
+				8D7F314C2AF25AAF000AB359 /* primordial.h */,
+				8D7F314B2AF25AAF000AB359 /* quadrature.h */,
+				8D7F315E2AF25AAF000AB359 /* sparse.h */,
+				8D7F315D2AF25AAF000AB359 /* svnversion.h */,
+				8D7F31612AF25AAF000AB359 /* thermodynamics.h */,
+				8D7F315C2AF25AAF000AB359 /* transfer.h */,
+				8D7F31522AF25AAF000AB359 /* trigonometric_integrals.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
 		AF089BBF27BD5191004D8CB6 /* external */ = {
 			isa = PBXGroup;
 			children = (
@@ -164,6 +230,8 @@
 		AFDC687D240D9EA00044B5A3 = {
 			isa = PBXGroup;
 			children = (
+				8D7F31632AF27E26000AB359 /* test.ini */,
+				8D7F31452AF25AAF000AB359 /* include */,
 				AF089BBF27BD5191004D8CB6 /* external */,
 				AFDC68C0240D9FB80044B5A3 /* main */,
 				AFDC68A6240D9F6B0044B5A3 /* tools */,
@@ -185,17 +253,17 @@
 		AFDC6891240D9F500044B5A3 /* source */ = {
 			isa = PBXGroup;
 			children = (
-				AFDC6892240D9F500044B5A3 /* lensing.c */,
-				AFDC6893240D9F500044B5A3 /* perturbations.c */,
-				AFDC6894240D9F500044B5A3 /* transfer.c */,
-				AFDC6895240D9F500044B5A3 /* thermodynamics.c */,
-				AFDC6896240D9F500044B5A3 /* input.c */,
-				AFDC6897240D9F500044B5A3 /* harmonic.c */,
-				AFDC6898240D9F500044B5A3 /* fourier.c */,
-				AFDC6899240D9F500044B5A3 /* primordial.c */,
 				AFDC689A240D9F500044B5A3 /* background.c */,
-				AFDC689B240D9F500044B5A3 /* output.c */,
 				AF089BBD27BD516E004D8CB6 /* distortions.c */,
+				AFDC6898240D9F500044B5A3 /* fourier.c */,
+				AFDC6897240D9F500044B5A3 /* harmonic.c */,
+				AFDC6896240D9F500044B5A3 /* input.c */,
+				AFDC6892240D9F500044B5A3 /* lensing.c */,
+				AFDC689B240D9F500044B5A3 /* output.c */,
+				AFDC6893240D9F500044B5A3 /* perturbations.c */,
+				AFDC6899240D9F500044B5A3 /* primordial.c */,
+				AFDC6895240D9F500044B5A3 /* thermodynamics.c */,
+				AFDC6894240D9F500044B5A3 /* transfer.c */,
 			);
 			path = source;
 			sourceTree = "<group>";
