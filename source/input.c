@@ -5649,6 +5649,26 @@ int input_read_parameters_output(struct file_content * pfc,
   class_read_int("lensing_verbose",ple->lensing_verbose);
   class_read_int("distortions_verbose",psd->distortions_verbose);
   class_read_int("output_verbose",pop->output_verbose);
+  
+  /** Gauge to plot perturbations in */
+  char plot_gauge[_ARGUMENT_LENGTH_MAX_];
+  int flag_temp;
+  parser_read_string(pfc, "plot_gauge", &plot_gauge, &flag_temp, errmsg);
+  if (flag_temp == _TRUE_) {
+    if ((strcmp(plot_gauge, "newtonian") == 0) || (strcmp(plot_gauge, "Newtonian") == 0)) {
+      ppt->plot_gauge = 0; // indexed as in the possible_gauges of perturbations.h
+    }
+    else if ((strcmp(plot_gauge, "synchronous") == 0) || (strcmp(plot_gauge, "Synchronous") == 0)) {
+      ppt->plot_gauge = 1; // indexed as in the possible_gauges of perturbations.h
+    }
+    else {
+      class_test(0 == 0, errmsg, "Invalid input in 'plot_gauges'. Choose either 'newtonian' or 'synchronous'.")
+    }
+  }
+  else {
+    // Default is Newtonian gauge
+    ppt->plot_gauge = 0;
+  }
 
   return _SUCCESS_;
 
