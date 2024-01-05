@@ -193,6 +193,8 @@ struct perturbations
   double * beta_idr;  /**< Angular contribution to collisional term at l>=2 for idr-idr */
 
   int idr_nature; /**< Nature of the interacting dark radiation (free streaming or fluid) */
+  
+  int plot_gauge; /** Gauge to plot the perturbations in */
 
   //@}
 

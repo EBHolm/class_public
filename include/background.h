@@ -105,9 +105,14 @@ struct background
   double three_eos_NEDE; /* NEDE e.o.s. (scenario A) */
   short decay_flag; /* NEDE decay flag; True iff NEDE has decayed */
 
+  
   double trigger_fluid_H_over_m; /* NEDE trigger fluid approximation threshold */
   int trigger_fluid_approximation; /* True iff trigger fluid approximation is on */
-  double a_trigger_fluid; /* Scale factor when trigger fluid approximation is turned on */
+  /* Quantities when trigger FA is turned on */
+  double H_fluid;
+  double H_prime_fluid;
+  double a_trigger_fluid;
+  
 
   /* NEDE decay time */
   double tau_decay;
