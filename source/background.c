@@ -3138,6 +3138,8 @@ int background_sources(
       // Turn on NEDE trigger fluid approximation
       printf("From BG Sources: Turned on FA at a=%g\n", a);
       pba->a_trigger_fluid = a;
+      pba->H_fluid = H;
+      pba->H_prime_fluid = bg_table_row[pba->index_bg_H_prime];
       // pba->trigger_fluid_approximation = _TRUE_;
       return _APPROXIMATION_REACHED_;
     }
