@@ -495,34 +495,33 @@ int background_functions(
 
   /* NEDE */
   if (pba->has_NEDE == _TRUE_) {
-   double a_decay = 1./(1. + pba->z_decay);
-   if (a < a_decay || a_decay == 0) {
-    /* w=-1 phase */
-    /* Note the class convention according to which 3 Mpl^2 is absorbed in rho, i.e. rho_crit = H0^2. */
-    rho_NEDE_decay = pba->Omega_NEDE * pow(pba->H0, 2);
-    /* Save value of rho in array for later use. */
-    pvecback[pba->index_bg_rho_NEDE] = rho_NEDE_decay;
-    pvecback[pba->index_bg_w_NEDE] = -1;
+    double a_decay = 1./(1. + pba->z_decay);
+    if (a < a_decay || a_decay == 0) {
+      /* w=-1 phase */
+      /* Note the class convention according to which 3 Mpl^2 is absorbed in rho, i.e. rho_crit = H0^2. */
+      rho_NEDE_decay = pba->Omega_NEDE * pow(pba->H0, 2);
+      /* Save value of rho in array for later use. */
+      pvecback[pba->index_bg_rho_NEDE] = rho_NEDE_decay;
+      pvecback[pba->index_bg_w_NEDE] = -1;
 
-    p_tot -= rho_NEDE_decay;   /* add pressure contributio n*/
-    rho_tot += rho_NEDE_decay; /* add energy contribution */
+      p_tot -= rho_NEDE_decay;   /* add pressure contributio n*/
+      rho_tot += rho_NEDE_decay; /* add energy contribution */
+    }
+    else {
+      /* NEDE decay phase with w > 0 */
+      class_call(background_quantities_NEDE(pba, a, 0, &rho_NEDE_decay, NULL, &w_NEDE, &dw_over_da_NEDE, NULL),
+                 pba->error_message,
+                 pba->error_message);
+
+      pvecback[pba->index_bg_rho_NEDE] = rho_NEDE_decay;
+      pvecback[pba->index_bg_w_NEDE] = w_NEDE;
+      p_tot += w_NEDE * rho_NEDE_decay;
+      rho_tot += rho_NEDE_decay;
+
+      dp_dloga += (a*dw_over_da_NEDE - 3*(1 + w_NEDE)*w_NEDE)*pvecback[pba->index_bg_rho_NEDE];
+    }
   }
-  else {
-    /* NEDE decay phase with w > 0 */
-    class_call(background_quantities_NEDE(pba, a, 0, &rho_NEDE_decay, NULL, &w_NEDE, &dw_over_da_NEDE, NULL),
-               pba->error_message,
-               pba->error_message);
 
-    pvecback[pba->index_bg_rho_NEDE] = rho_NEDE_decay;
-    pvecback[pba->index_bg_w_NEDE] = w_NEDE;
-    p_tot += w_NEDE * rho_NEDE_decay;
-    rho_tot += rho_NEDE_decay;
-
-    dp_dloga += (a*dw_over_da_NEDE - 3*(1 + w_NEDE)*w_NEDE)*pvecback[pba->index_bg_rho_NEDE];
-  }
-  }
-
-                           
   /* NEDE trigger field */
   if (pba->has_NEDE_trigger == _TRUE_) {
     if (pba->trigger_fluid_approximation == _FALSE_) {
@@ -2231,21 +2230,6 @@ int background_solve(
                              pba->error_message),
              pba->error_message,
              pba->error_message);
-
-  /** - recover some quantities today */
-  /* -> age in Gyears */
-  pba->age = pvecback_integration[pba->index_bi_time]/_Gyr_over_Mpc_;
-  /* -> conformal age in Mpc */
-  pba->conformal_age = pvecback_integration[pba->index_bi_tau];
-  /* -> contribution of decaying dark matter and dark radiation to the critical density today: */
-  if (pba->has_dcdm == _TRUE_) {
-    pba->Omega0_dcdm = pvecback_integration[pba->index_bi_rho_dcdm]/pba->H0/pba->H0;
-  }
-  if (pba->has_dr == _TRUE_) {
-    pba->Omega0_dr = pvecback_integration[pba->index_bi_rho_dr]/pba->H0/pba->H0;
-  }
-  /* -> scale-invariant growth rate today */
-  D_today = pvecback_integration[pba->index_bi_D];
   
   double* new_pvecback_integration;
   if (pba->has_NEDE_trigger) {
@@ -2311,23 +2295,25 @@ int background_solve(
                                  pba->error_message),
                  pba->error_message,
                  pba->error_message);
-      
-      /** - recover some quantities today */
-      /* -> age in Gyears */
-      pba->age = new_pvecback_integration[pba->index_bi_time]/_Gyr_over_Mpc_;
-      /* -> conformal age in Mpc */
-      pba->conformal_age = new_pvecback_integration[pba->index_bi_tau];
-      /* -> contribution of decaying dark matter and dark radiation to the critical density today: */
-      if (pba->has_dcdm == _TRUE_) {
-        pba->Omega0_dcdm = new_pvecback_integration[pba->index_bi_rho_dcdm]/pba->H0/pba->H0;
-      }
-      if (pba->has_dr == _TRUE_) {
-        pba->Omega0_dr = new_pvecback_integration[pba->index_bi_rho_dr]/pba->H0/pba->H0;
-      }
-      /* -> scale-invariant growth rate today */
-      D_today = new_pvecback_integration[pba->index_bi_D];
+      free(pvecback_integration);
+      pvecback_integration = new_pvecback_integration;
     }
   }
+  
+  /** - recover some quantities today */
+  /* -> age in Gyears */
+  pba->age = pvecback_integration[pba->index_bi_time]/_Gyr_over_Mpc_;
+  /* -> conformal age in Mpc */
+  pba->conformal_age = pvecback_integration[pba->index_bi_tau];
+  /* -> contribution of decaying dark matter and dark radiation to the critical density today: */
+  if (pba->has_dcdm == _TRUE_) {
+    pba->Omega0_dcdm = pvecback_integration[pba->index_bi_rho_dcdm]/pba->H0/pba->H0;
+  }
+  if (pba->has_dr == _TRUE_) {
+    pba->Omega0_dr = pvecback_integration[pba->index_bi_rho_dr]/pba->H0/pba->H0;
+  }
+  /* -> scale-invariant growth rate today */
+  D_today = pvecback_integration[pba->index_bi_D];
 
   /** - In a loop over lines, fill rest of background table for
       quantities that depend on numbers like "conformal_age" or
@@ -2468,11 +2454,6 @@ int background_solve(
   free(pvecback);
   free(pvecback_integration);
   free(used_in_output);
-  if (pba->has_NEDE_trigger) {
-    if (pba->trigger_fluid_approximation == _TRUE_) {
-      free(new_pvecback_integration);
-    }
-  }
 
   return _SUCCESS_;
 
@@ -2748,6 +2729,18 @@ int background_find_equality(
 
   class_alloc(pvecback,pba->bg_size*sizeof(double),pba->error_message);
 
+  // Always do at least one iteration
+  tau_mid = 0.5*(tau_plus+tau_minus);
+  class_call(background_at_tau(pba,tau_mid,long_info,inter_closeby,&index_tau_minus,pvecback),
+             pba->error_message,
+             pba->error_message);
+  Omega_m_over_Omega_r = pvecback[pba->index_bg_Omega_m]/pvecback[pba->index_bg_Omega_r];
+  if (Omega_m_over_Omega_r > 1)
+    tau_plus = tau_mid;
+  else
+    tau_minus = tau_mid;
+
+  // Then iterate until desired precision is reached
   while ((tau_plus - tau_minus) > ppr->tol_tau_eq) {
 
     tau_mid = 0.5*(tau_plus+tau_minus);

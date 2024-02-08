@@ -571,10 +571,9 @@ int evolver_ndf15(
         /*Interpolate if we have overshot sample values*/
         interp_from_dif(t_vec[next],tnew,ynew,h,dif,k,yinterp,ypinterp,yppinterp,interpidx,neq,2);
         
-        output_return = output(t_vec[next],ynew+1,f0+1,next,parameters_and_workspace_for_derivs,error_message);
+        output_return = output(t_vec[next],yinterp+1,ypinterp+1,next,parameters_and_workspace_for_derivs,error_message);
         // class_call((*output)(t_vec[next],yinterp+1,ypinterp+1,next,parameters_and_workspace_for_derivs,
         //            error_message),error_message,error_message);
-
       }
       
       if (output_return == _FAILURE_) {
@@ -1099,7 +1098,7 @@ int fzero_Newton(int (*func)(double *x,
      take ntrial Newton-Raphson steps to improve the root.
      Stop if the root converges in either summed absolute
      variable increments tolx or summed absolute function values tolf.*/
-  int k,i,j,*indx, ntrial=20;
+  int k,i,j,*indx, ntrial=30;
   double errx,errf,d,*F0,*Fdel,**Fjac,*p, *lu_work;
   int has_converged = _FALSE_;
   int funcreturn;
