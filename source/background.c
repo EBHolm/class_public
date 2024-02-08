@@ -2206,6 +2206,13 @@ int background_solve(
       printf("%s\n", "Chose ndf15 as generic_evolver");
     }
     break;
+      
+  case rkdp45:
+    generic_evolver = evolver_rkdp45;
+    if (pba->background_verbose > 1) {
+      printf("%s\n", "Chose rkdp45 as generic_evolver");
+    }
+    break;
   }
 
   /** - perform the integration */

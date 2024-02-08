@@ -129,6 +129,18 @@ int string_begins_with(char* thestring, char beginchar);
 #define class_call(function, error_message_from_function, error_message_output)                                  \
   class_call_except(function, error_message_from_function,error_message_output,)
 
+/* macro for calling output in evolvers with possiblity for approximation reached */
+#define class_evolver_output(function, error_message_from_function, error_message_output)  {                     \
+  int output_return = function;                                                                                  \
+  if (output_return == _FAILURE_) {                                                                              \
+      class_call_message(error_message, output, error_message)                                                   \
+      return _FAILURE_;                                                                                          \
+  }                                                                                                              \
+  else if (output_return == _APPROXIMATION_REACHED_) {                                                           \
+    done = _TRUE_;                                                                                               \
+  }                                                                                                              \
+}
+
 /* same in parallel region */
 #define class_call_parallel(function, error_message_from_function, error_message_output) {                       \
   if (abort == _FALSE_) {                                                                                        \
@@ -348,7 +360,8 @@ struct output;
  */
 enum evolver_type {
   rk, /* Runge-Kutta integrator */
-  ndf15 /* stiff integrator */
+  ndf15, /* stiff integrator */
+  rkdp45 /* Runge-Kutta Dormand-Prince */
 };
 
 /**

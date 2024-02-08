@@ -3361,8 +3361,11 @@ int perturbations_solve(
     if (ppr->evolver == rk){
       generic_evolver = evolver_rk;
     }
-    else {
+    else if (ppr->evolver == ndf15){
       generic_evolver = evolver_ndf15;
+    }
+    else if (ppr->evolver == rkdp45) {
+      generic_evolver = evolver_rkdp45;
     }
 
     class_call(generic_evolver(perturbations_derivs,

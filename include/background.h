@@ -8,6 +8,7 @@
 #include "growTable.h"
 #include "arrays.h"
 #include "dei_rkck.h"
+#include "evolver_rkdp45.h"
 #include "parser.h"
 
 /** list of possible types of spatial curvature */
