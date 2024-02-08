@@ -7223,7 +7223,7 @@ int perturbations_approximations(
     if (pba->has_NEDE_pert == _TRUE_)
     {
       /*before transition CCa_on*/
-      if (1. / ppw->pvecback[pba->index_bg_a] - 1. > pba->z_decay)
+      if (1. / ppw->pvecback[pba->index_bg_a] - 1. > pba->z_decay_NEDE)
       {
         ppw->approx[ppw->index_ap_CCa] = (int)CCa_on;
       }
@@ -7233,7 +7233,7 @@ int perturbations_approximations(
         ppw->approx[ppw->index_ap_CCa] = (int)CCa_off;
       }
       /*When the NEDE fluid becomes highly subdominant set sda_on*/
-      if ((1. / ppw->pvecback[pba->index_bg_a] - 1. < pba->z_decay * 0.9) && (ppw->pvecback[pba->index_bg_rho_NEDE] / pow(ppw->pvecback[pba->index_bg_H], 2) < ppr->sub_dom_cond))
+      if ((1. / ppw->pvecback[pba->index_bg_a] - 1. < pba->z_decay_NEDE * 0.9) && (ppw->pvecback[pba->index_bg_rho_NEDE] / pow(ppw->pvecback[pba->index_bg_H], 2) < ppr->sub_dom_cond))
       {
         ppw->approx[ppw->index_ap_sda] = (int)sda_on;
       }

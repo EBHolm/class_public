@@ -1298,14 +1298,15 @@ int input_get_guess(double *xguess,
         double z_NEDE = pfzw->target_value[index_guess];
         double trigger_mass = 0.5 * ba.H0 / ba.Bubble_trigger_H_over_m * pow(1. / (1. - ba.f_NEDE), 0.5) * pow(Omega_M * pow((1. + z_NEDE), 3) + Omega_M * pow((1. + z_NEDE), 4) / (3001.) + (1. - Omega_M), 0.5);
         
-        xguess[index_guess] = 0.5 * ba.H0 / ba.Bubble_trigger_H_over_m * pow(1. / (1. - ba.f_NEDE), 0.5) * pow(Omega_M * pow((1. + pfzw->target_value[index_guess]), 3) + Omega_M * pow((1. + pfzw->target_value[index_guess]), 4) / (3001.) + (1. - Omega_M), 0.5);
+        xguess[index_guess] = trigger_mass;
         dxdy[index_guess] = 0.5 * trigger_mass * (3. * Omega_M * pow((1. + z_NEDE), 2) + 4. * Omega_M * pow((1. + z_NEDE), 3) / (3001.)) / (Omega_M * pow((1. + z_NEDE), 3) + Omega_M * pow((1. + z_NEDE), 4) / (3001.) + (1. - Omega_M));
         break;
       }
       case Omega0_NEDE_trigger_DM: {
         // Need to guess NEDE_trigger_ini
         double Omega_M = ba.Omega0_cdm + ba.Omega0_b + ba.Omega0_ncdm_tot;
-        double z_NEDE = ba.z_decay;
+        // Bad guess: This not being the actual z makes this guess quite bad, I think. Issue is, we haven't computed yet.
+        double z_NEDE = ba.z_decay_NEDE;
         double trigger_mass = 0.5 * ba.H0 / ba.Bubble_trigger_H_over_m * pow(1. / (1. - ba.f_NEDE), 0.5) * pow(Omega_M * pow((1. + z_NEDE), 3) + Omega_M * pow((1. + z_NEDE), 4) / (3001.) + (1. - Omega_M), 0.5);
         
         xguess[index_guess] = pow(75. * ba.H0 * ba.H0 * pfzw->target_value[index_guess] * pow(z_NEDE, 3) / pow(trigger_mass, 2), 0.5);
@@ -1316,7 +1317,7 @@ int input_get_guess(double *xguess,
         // Need to guess Omega0_NEDE_trigger_DM
         // Inversion of the guess above
         double Omega_M = ba.Omega0_cdm + ba.Omega0_b + ba.Omega0_ncdm_tot;
-        double z_NEDE = ba.z_decay;
+        double z_NEDE = ba.z_decay_NEDE;
         double trigger_mass = 0.5 * ba.H0 / ba.Bubble_trigger_H_over_m * pow(1. / (1. - ba.f_NEDE), 0.5) * pow(Omega_M * pow((1. + z_NEDE), 3) + Omega_M * pow((1. + z_NEDE), 4) / (3001.) + (1. - Omega_M), 0.5);
         
         xguess[index_guess] = pow(pfzw->target_value[index_guess]*trigger_mass/ba.H0, 2.)/(75.*pow(z_NEDE, 3.));
@@ -3213,8 +3214,8 @@ int input_read_parameters_species(struct file_content * pfc,
   
   /** 7.3) New Early Dark Energy */
   class_read_double("f_NEDE", pba->f_NEDE);
-  class_read_double("z_decay_NEDE", pba->z_decay);                  /* Related by shooting */
-  class_read_double("NEDE_trigger_mass", pba->NEDE_trigger_mass);   /*                     */
+  class_read_double("z_decay_NEDE", pba->z_decay_NEDE);                  /* Related by shooting */
+  class_read_double("NEDE_trigger_mass", pba->NEDE_trigger_mass);        /*                     */
   class_read_double("three_eos_NEDE", pba->three_eos_NEDE);
   class_read_double("three_ceff2_NEDE", ppt->three_ceff2_NEDE);
   class_read_double("three_cvis2_NEDE", ppt->three_cvis2_NEDE);
@@ -3265,7 +3266,7 @@ int input_read_parameters_species(struct file_content * pfc,
     else if (pba->f_NEDE == 0)
       pba->f_NEDE = pba->Omega_NEDE / pow(pba->NEDE_trigger_mass * pba->Bubble_trigger_H_over_m / pba->H0, 2);
     
-    class_test(pba->z_decay == 0, errmsg,
+    class_test(pba->z_decay_NEDE == 0, errmsg,
                "In input file, z_decay_NEDE  needs to be specified for NEDE (The trigger mass as input parameter has been retired in v5).");
 
     class_test(pba->f_NEDE > 0.4, errmsg,
@@ -3282,7 +3283,7 @@ int input_read_parameters_species(struct file_content * pfc,
     pba->phi_prime_ini_trigger = 0; // This value is set to the attractor later.
 
     if (pba->NEDE_fld_nature == NEDE_fld_A)
-      pba->Omega0_NEDE = pba->Omega_NEDE * pow(1. / (1. + pba->z_decay), (3. + pba->three_eos_NEDE));
+      pba->Omega0_NEDE = pba->Omega_NEDE * pow(1. / (1. + pba->z_decay_NEDE), (3. + pba->three_eos_NEDE));
   }
 
 
@@ -3368,7 +3369,6 @@ int input_read_parameters_species(struct file_content * pfc,
   /* NEDE budget, both zero if no NEDE */
   Omega_tot += pba->Omega0_NEDE;
   Omega_tot += pba->Omega0_trigger;
-  printf("Omega0_NEDE=%g, Omega0_NEDE_trigger_DM=%g\n", pba->Omega0_NEDE, pba->Omega0_trigger);
 
   /* Step 1 */
   if (flag1 == _TRUE_){
@@ -6006,7 +6006,7 @@ int input_default_params(struct background *pba,
 
   pba->Bubble_trigger_H_over_m = .2; // Default value ionferred from miscroscpic model.
   pba->NEDE_trigger_mass = 0.;
-  pba->z_decay = 0.;
+  pba->z_decay_NEDE = 0.;
 
   ppt->three_ceff2_NEDE = 2.; // Default: matches adiabatic sound speed.
   ppt->three_cvis2_NEDE = 0.;

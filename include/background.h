@@ -117,8 +117,7 @@ struct background
   /* NEDE decay time */
   double tau_decay;
   double a_decay;
-  double z_decay;
-
+  double z_decay_NEDE;
   /* NEDE fluid nature*/
   int NEDE_fld_nature;
   

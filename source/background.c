@@ -495,7 +495,7 @@ int background_functions(
 
   /* NEDE */
   if (pba->has_NEDE == _TRUE_) {
-    double a_decay = 1./(1. + pba->z_decay);
+    double a_decay = 1./(1. + pba->z_decay_NEDE);
     if (a < a_decay || a_decay == 0) {
       /* w=-1 phase */
       /* Note the class convention according to which 3 Mpl^2 is absorbed in rho, i.e. rho_crit = H0^2. */
@@ -526,9 +526,6 @@ int background_functions(
   if (pba->has_NEDE_trigger == _TRUE_) {
     if (pba->trigger_fluid_approximation == _FALSE_) {
       // This part is relevant before the fluid approximation is turned on.
-      if (a == pba->a_trigger_fluid) {
-        int k = 0;
-      }
       phi = pvecback_B[pba->index_bi_phi_trigger];
       phi_prime = pvecback_B[pba->index_bi_phi_prime_trigger];
       pvecback[pba->index_bg_V_trigger] = V_trigger(pba, phi);     // V_scf(pba,phi); //write here potential as function of phi
@@ -915,7 +912,7 @@ int background_quantities_NEDE(
   {
   case NEDE_fld_A:
     w_local = pba->three_eos_NEDE / 3.;
-    rho_local = (pba->Omega_NEDE) * pow(pba->H0, 2) * pow(1./(1. + pba->z_decay) / a, 3. + 3. * w_local);
+    rho_local = (pba->Omega_NEDE) * pow(pba->H0, 2) * pow(1./(1. + pba->z_decay_NEDE) / a, 3. + 3. * w_local);
     w_prime = 0.;
 
     if (w != NULL)
@@ -2396,7 +2393,7 @@ int background_solve(
     if (pba->has_NEDE == _TRUE_)
     {
       printf("  -> NEDE details:\n");
-      printf("     -> NEDE decay time: %.2f \n", pba->z_decay);
+      printf("     -> NEDE decay time: %.2f \n", pba->z_decay_NEDE);
       printf("     -> NEDE fraction: %.4f \n", pba->f_NEDE);
       if (pba->NEDE_fld_nature == NEDE_fld_A)
         printf("     -> Scenario A with eos NEDE: 3*w = %.2f \n", pba->three_eos_NEDE);
