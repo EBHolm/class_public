@@ -1305,7 +1305,6 @@ int input_get_guess(double *xguess,
       case Omega0_NEDE_trigger_DM: {
         // Need to guess NEDE_trigger_ini
         double Omega_M = ba.Omega0_cdm + ba.Omega0_b + ba.Omega0_ncdm_tot;
-        // Bad guess: This not being the actual z makes this guess quite bad, I think. Issue is, we haven't computed yet.
         double z_NEDE = ba.z_decay_NEDE;
         double trigger_mass = 0.5 * ba.H0 / ba.Bubble_trigger_H_over_m * pow(1. / (1. - ba.f_NEDE), 0.5) * pow(Omega_M * pow((1. + z_NEDE), 3) + Omega_M * pow((1. + z_NEDE), 4) / (3001.) + (1. - Omega_M), 0.5);
         
