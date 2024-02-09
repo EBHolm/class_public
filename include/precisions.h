@@ -17,7 +17,7 @@ class_precision_parameter(background_Nloga,int,40000)
  * Evolver to be used for thermodynamics (rk, ndf15, rkdp45)
  */
 // class_type_parameter(background_evolver,int,enum evolver_type,rkdp45)
-class_precision_parameter(background_evolver,int,2)
+class_precision_parameter(background_evolver,int,1)
 /**
  * Tolerance of the background integration, giving the allowed relative integration error.
  * (used by both evolvers)
@@ -140,7 +140,7 @@ class_precision_parameter(thermo_Nz_log,int,5000)
 /**
  * Evolver to be used for thermodynamics (rk, ndf15)
  */
-class_type_parameter(thermo_evolver,int,enum evolver_type,rkdp45)
+class_type_parameter(thermo_evolver,int,enum evolver_type,ndf15)
 /**
  * Tolerance of the relative value of integral during thermodynamical integration
  * (used by both evolvers)
@@ -388,7 +388,7 @@ class_precision_parameter(neglect_CMB_sources_below_visibility,double,1.0e-3)
  * The type of evolver to use: options are ndf15 or rk
  */
 //class_type_parameter(evolver,int,enum evolver_type,rkdp45)
-class_precision_parameter(evolver,int,2)
+class_precision_parameter(evolver,int,1)
 
 /*
  * Primordial parameters
