@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8D541BE02B7528D900E531D0 /* evolver_rkdp45.c in Sources */ = {isa = PBXBuildFile; fileRef = 8D541BDE2B7528C500E531D0 /* evolver_rkdp45.c */; };
 		AF089BBE27BD516E004D8CB6 /* distortions.c in Sources */ = {isa = PBXBuildFile; fileRef = AF089BBD27BD516E004D8CB6 /* distortions.c */; };
 		AF089C5C27BD5191004D8CB6 /* history.c in Sources */ = {isa = PBXBuildFile; fileRef = AF089BC127BD5191004D8CB6 /* history.c */; };
 		AF089C5D27BD5191004D8CB6 /* energy_injection.c in Sources */ = {isa = PBXBuildFile; fileRef = AF089BC327BD5191004D8CB6 /* energy_injection.c */; };
@@ -54,6 +55,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		8D541BDE2B7528C500E531D0 /* evolver_rkdp45.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = evolver_rkdp45.c; sourceTree = "<group>"; };
+		8D541BDF2B7528CE00E531D0 /* evolver_rkdp45.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = evolver_rkdp45.h; sourceTree = "<group>"; };
 		8D7F31462AF25AAF000AB359 /* macros_precision.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = macros_precision.h; sourceTree = "<group>"; };
 		8D7F31472AF25AAF000AB359 /* hermite6_interpolation_csource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hermite6_interpolation_csource.h; sourceTree = "<group>"; };
 		8D7F31482AF25AAF000AB359 /* input.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = input.h; sourceTree = "<group>"; };
@@ -152,6 +155,7 @@
 				8D7F31492AF25AAF000AB359 /* dei_rkck.h */,
 				8D7F314E2AF25AAF000AB359 /* distortions.h */,
 				8D7F31502AF25AAF000AB359 /* evolver_ndf15.h */,
+				8D541BDF2B7528CE00E531D0 /* evolver_rkdp45.h */,
 				8D7F31512AF25AAF000AB359 /* evolver_rkck.h */,
 				8D7F315A2AF25AAF000AB359 /* fourier.h */,
 				8D7F314D2AF25AAF000AB359 /* growTable.h */,
@@ -281,6 +285,7 @@
 				AFDC68AE240D9F6B0044B5A3 /* growTable.c */,
 				AFDC68AF240D9F6B0044B5A3 /* quadrature.c */,
 				AFDC68B0240D9F6B0044B5A3 /* evolver_rkck.c */,
+				8D541BDE2B7528C500E531D0 /* evolver_rkdp45.c */,
 				AFDC68B1240D9F6B0044B5A3 /* evolver_ndf15.c */,
 				AFDC68B2240D9F6B0044B5A3 /* hermite4_interpolation_csource.h */,
 				AFDC68B3240D9F6B0044B5A3 /* parser.c */,
@@ -360,6 +365,7 @@
 				AF089C5D27BD5191004D8CB6 /* energy_injection.c in Sources */,
 				AFDC68A1240D9F500044B5A3 /* harmonic.c in Sources */,
 				AFDC68A2240D9F500044B5A3 /* fourier.c in Sources */,
+				8D541BE02B7528D900E531D0 /* evolver_rkdp45.c in Sources */,
 				AFDC68B6240D9F6B0044B5A3 /* arrays.c in Sources */,
 				AF089C6527BD5191004D8CB6 /* wrap_recfast.c in Sources */,
 				AF089C5C27BD5191004D8CB6 /* history.c in Sources */,
