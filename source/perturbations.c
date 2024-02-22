@@ -3466,10 +3466,6 @@ int perturbations_prepare_k_output(struct background * pba,
       class_store_columntitle(ppt->scalar_titles,"delta_ur",pba->has_ur);
       class_store_columntitle(ppt->scalar_titles,"theta_ur",pba->has_ur);
       class_store_columntitle(ppt->scalar_titles,"shear_ur",pba->has_ur);
-      /* NEDE*/
-      class_store_columntitle(ppt->scalar_titles, "delta_NEDE", pba->has_NEDE_pert);
-      class_store_columntitle(ppt->scalar_titles, "theta_NEDE", pba->has_NEDE_pert);
-      class_store_columntitle(ppt->scalar_titles, "shear_NEDE", pba->has_NEDE_pert);
       /* Interacting dark radiation */
       class_store_columntitle(ppt->scalar_titles,"delta_idr",pba->has_idr);
       class_store_columntitle(ppt->scalar_titles,"theta_idr",pba->has_idr);
@@ -3504,13 +3500,17 @@ int perturbations_prepare_k_output(struct background * pba,
       /* Scalar field scf */
       class_store_columntitle(ppt->scalar_titles, "delta_scf", pba->has_scf);
       class_store_columntitle(ppt->scalar_titles, "theta_scf", pba->has_scf);
-      /* NEDE: Trigger field*/
-      class_store_columntitle(ppt->scalar_titles, "delta_trigger", pba->has_NEDE_trigger);
-      class_store_columntitle(ppt->scalar_titles, "theta_hat_trigger", pba->has_NEDE_trigger);
       /** Fluid */
       class_store_columntitle(ppt->scalar_titles, "delta_rho_fld", pba->has_fld);
       class_store_columntitle(ppt->scalar_titles, "rho_plus_p_theta_fld", pba->has_fld);
       class_store_columntitle(ppt->scalar_titles, "delta_p_fld", pba->has_fld);
+      /* NEDE*/
+      class_store_columntitle(ppt->scalar_titles, "delta_NEDE", pba->has_NEDE_pert);
+      class_store_columntitle(ppt->scalar_titles, "theta_NEDE", pba->has_NEDE_pert);
+      class_store_columntitle(ppt->scalar_titles, "shear_NEDE", pba->has_NEDE_pert);
+      /* NEDE: Trigger field*/
+      class_store_columntitle(ppt->scalar_titles, "delta_trigger", pba->has_NEDE_trigger);
+      class_store_columntitle(ppt->scalar_titles, "theta_hat_trigger", pba->has_NEDE_trigger);
 
       ppt->number_of_scalar_titles =
         get_number_of_titles(ppt->scalar_titles);
