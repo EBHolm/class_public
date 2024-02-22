@@ -7909,35 +7909,6 @@ int perturbations_total_stress_energy(
       }
 
     }
-    
-    /*New EDE*/
-    /*Here contributions to EMT are collected*/
-    if (pba->has_NEDE_pert == _TRUE_)
-    {
-
-      if ((ppw->approx[ppw->index_ap_sda] == (int)sda_off) && (ppw->approx[ppw->index_ap_CCa] == (int)CCa_off))
-      {
-
-        delta_NEDE = y[ppw->pv->index_pt_delta_NEDE];
-        theta_NEDE = y[ppw->pv->index_pt_theta_NEDE];
-        shear_NEDE = y[ppw->pv->index_pt_shear_NEDE];
-      }
-      else
-      {
-        delta_NEDE = 0.;
-        theta_NEDE = 0.;
-        shear_NEDE = 0.;
-      }
-
-      if (pba->has_NEDE_trigger_DM == _TRUE_)
-      {
-        if ((ppw->approx[ppw->index_ap_tfa] == (int)tfa_on))
-        {
-          delta_trigger = y[ppw->pv->index_pt_delta_trigger_fld];
-          theta_trigger = y[ppw->pv->index_pt_theta_trigger_fld];
-        }
-      }
-    }
 
     /** - ---> (a.3.) baryon pressure perturbation */
 
@@ -8179,6 +8150,35 @@ int perturbations_total_stress_energy(
           rho_plus_p_theta_m += (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm])
             *ppw->theta_ncdm[n_ncdm]; // contribution to [(rho+p)theta]_matter
           rho_plus_p_m += (ppw->pvecback[pba->index_bg_rho_ncdm1+n_ncdm]+ppw->pvecback[pba->index_bg_p_ncdm1+n_ncdm]);
+        }
+      }
+    }
+    
+    /*New EDE*/
+    /*Here contributions to EMT are collected*/
+    if (pba->has_NEDE_pert == _TRUE_)
+    {
+
+      if ((ppw->approx[ppw->index_ap_sda] == (int)sda_off) && (ppw->approx[ppw->index_ap_CCa] == (int)CCa_off))
+      {
+
+        delta_NEDE = y[ppw->pv->index_pt_delta_NEDE];
+        theta_NEDE = y[ppw->pv->index_pt_theta_NEDE];
+        shear_NEDE = y[ppw->pv->index_pt_shear_NEDE];
+      }
+      else
+      {
+        delta_NEDE = 0.;
+        theta_NEDE = 0.;
+        shear_NEDE = 0.;
+      }
+
+      if (pba->has_NEDE_trigger_DM == _TRUE_)
+      {
+        if ((ppw->approx[ppw->index_ap_tfa] == (int)tfa_on))
+        {
+          delta_trigger = y[ppw->pv->index_pt_delta_trigger_fld];
+          theta_trigger = y[ppw->pv->index_pt_theta_trigger_fld];
         }
       }
     }

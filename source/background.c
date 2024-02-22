@@ -1206,6 +1206,7 @@ int background_indices(
     pba->has_NEDE = _TRUE_;
     pba->has_NEDE_trigger = _TRUE_;
     pba->has_NEDE_pert = _TRUE_;
+    pba->has_NEDE_trigger_DM = _TRUE_;
   }
 
   if (pba->Omega0_scf != 0.)
