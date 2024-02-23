@@ -2455,6 +2455,11 @@ cdef class Class:
                 value = self.ba.H_eq
             elif name == 'tau_eq':
                 value = self.ba.tau_eq
+            elif name == 'a_trigger_fluid':
+                if (self.ba.has_NEDE == _TRUE_):
+                    value = self.ba.a_trigger_fluid
+                else:
+                    raise CosmoSevereError("You have asked for 'a_trigger_fluid', but did not run with NEDE.")
             elif name == 'g_sd':
                 self.compute(["distortions"])
                 if (self.sd.has_distortions == _FALSE_):

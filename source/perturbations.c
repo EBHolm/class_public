@@ -3511,6 +3511,7 @@ int perturbations_prepare_k_output(struct background * pba,
       /* NEDE: Trigger field*/
       class_store_columntitle(ppt->scalar_titles, "delta_trigger", pba->has_NEDE_trigger);
       class_store_columntitle(ppt->scalar_titles, "theta_hat_trigger", pba->has_NEDE_trigger);
+      class_store_columntitle(ppt->scalar_titles, "cs2_trigger", pba->has_NEDE_trigger);
 
       ppt->number_of_scalar_titles =
         get_number_of_titles(ppt->scalar_titles);
@@ -8233,7 +8234,7 @@ int perturbations_total_stress_energy(
         delta_trigger = y[ppw->pv->index_pt_delta_trigger_fld];
         theta_trigger = y[ppw->pv->index_pt_theta_trigger_fld];
 
-        ppw->delta_rho = ppw->delta_rho + ppw->pvecback[pba->index_bg_rho_trigger] * delta_trigger;
+        ppw->delta_rho += ppw->pvecback[pba->index_bg_rho_trigger] * delta_trigger;
 
         ppw->rho_plus_p_theta = ppw->rho_plus_p_theta + (1. + w_trigger) * ppw->pvecback[pba->index_bg_rho_trigger] * theta_trigger;
 
@@ -9266,7 +9267,7 @@ int perturbations_print_variables(double tau,
   
   /*variables for New EDE*/
   double delta_NEDE = 0., theta_NEDE = 0., shear_NEDE = 0.;
-  double delta_rho_trigger = 0., rho_plus_p_theta_trigger = 0.;
+  double delta_rho_trigger = 0., rho_plus_p_theta_trigger = 0., cs2_trigger = 0.;
   double delta_trigger = 0., theta_trigger = 0.;
 
 
@@ -9431,7 +9432,11 @@ int perturbations_print_variables(double tau,
         else if ((pba->has_NEDE_trigger_DM == _TRUE_) && (ppw->approx[ppw->index_ap_tfa] == (int)tfa_on))
 
         {
-
+          
+          class_call(trigger_NEDE_cs2(pba, a, k, ppw->pvecback[pba->index_bg_H], &cs2_trigger),
+                     pba->error_message,
+                     pba->error_message);
+          
           delta_trigger = y[ppw->pv->index_pt_delta_trigger_fld];
           theta_trigger = y[ppw->pv->index_pt_theta_trigger_fld];
           rho_plus_p_theta_trigger = theta_trigger * (pvecback[pba->index_bg_rho_trigger] + pvecback[pba->index_bg_p_trigger]);
@@ -9741,6 +9746,7 @@ int perturbations_print_variables(double tau,
     /*New EDE; Trigger field*/
     class_store_double(dataptr, delta_trigger, pba->has_NEDE_trigger, storeidx);
     class_store_double(dataptr, rho_plus_p_theta_trigger, pba->has_NEDE_trigger, storeidx);
+    class_store_double(dataptr, cs2_trigger, pba->has_NEDE_trigger, storeidx);
     //fprintf(ppw->perturbations_output_file,"\n");
 
   }

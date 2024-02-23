@@ -693,16 +693,21 @@ int background_functions(
                            
   if (pba->has_NEDE_trigger == _TRUE_) {
    /** The contribution of the trigger field was not added to dp_dloga, add p_scf_prime here: */
+    pvecback[pba->index_bg_w_trigger] = 0.;
+    pvecback[pba->index_bg_ca2_trigger] = 0.;
     if (pba->trigger_fluid_approximation == _FALSE_) {
       pvecback[pba->index_bg_p_prime_trigger] = pvecback[pba->index_bg_phi_prime_trigger]*(-pvecback[pba->index_bg_phi_prime_trigger]*pvecback[pba->index_bg_H]/a - 2./3.*pvecback[pba->index_bg_dV_trigger]);
       pvecback[pba->index_bg_p_tot_prime] += pvecback[pba->index_bg_p_prime_trigger];
     }
     else {
       // Similarly in the fluid case.
-      double w_trigger, dw_over_da_trigger;
-      class_call(background_quantities_NEDE_trigger(pba, a, a*pvecback[pba->index_bg_H], pvecback[pba->index_bg_H], pvecback[pba->index_bg_H_prime], &w_trigger, &dw_over_da_trigger, NULL),
+      double w_trigger, dw_over_da_trigger, ca2_trigger;
+      class_call(background_quantities_NEDE_trigger(pba, a, a*pvecback[pba->index_bg_H], pvecback[pba->index_bg_H], pvecback[pba->index_bg_H_prime], &w_trigger, &dw_over_da_trigger, &ca2_trigger),
                  pba->error_message,
                  pba->error_message);
+      
+      pvecback[pba->index_bg_w_trigger] = w_trigger;
+      pvecback[pba->index_bg_ca2_trigger] = ca2_trigger;
       
       double dp_dloga_trigger = (a*dw_over_da_trigger - 3.*(1. + w_trigger)*w_trigger)*pvecback[pba->index_bg_rho_trigger];
       pvecback[pba->index_bg_p_prime_trigger] = 0.; // Not tracked in fluid approximation
@@ -1321,6 +1326,8 @@ int background_indices(
   class_define_index(pba->index_bg_rho_trigger, pba->has_NEDE_trigger, index_bg, 1);
   class_define_index(pba->index_bg_p_trigger, pba->has_NEDE_trigger, index_bg, 1);
   class_define_index(pba->index_bg_p_prime_trigger, pba->has_NEDE_trigger, index_bg, 1);
+  class_define_index(pba->index_bg_w_trigger, pba->has_NEDE_trigger, index_bg, 1);
+  class_define_index(pba->index_bg_ca2_trigger, pba->has_NEDE_trigger, index_bg, 1);
 
   /* - end of indices in the normal vector of background values */
   pba->bg_size_normal = index_bg;
@@ -2838,6 +2845,8 @@ int background_output_titles(
   class_store_columntitle(titles, "V_trigger", pba->has_NEDE_trigger)
   class_store_columntitle(titles, "dV_trigger", pba->has_NEDE_trigger)
   class_store_columntitle(titles, "ddV_trigger", pba->has_NEDE_trigger)
+  class_store_columntitle(titles, "w_trigger", pba->has_NEDE_trigger)
+  class_store_columntitle(titles, "ca2_trigger", pba->has_NEDE_trigger)
 
   class_store_columntitle(titles,"(.)rho_scf",pba->has_scf);
   class_store_columntitle(titles,"(.)p_scf",pba->has_scf);
@@ -2922,6 +2931,8 @@ int background_output_data(
     class_store_double(dataptr, pvecback[pba->index_bg_V_trigger], pba->has_NEDE_trigger, storeidx);
     class_store_double(dataptr, pvecback[pba->index_bg_dV_trigger], pba->has_NEDE_trigger, storeidx);
     class_store_double(dataptr, pvecback[pba->index_bg_ddV_trigger], pba->has_NEDE_trigger, storeidx);
+    class_store_double(dataptr, pvecback[pba->index_bg_w_trigger], pba->has_NEDE_trigger, storeidx);
+    class_store_double(dataptr, pvecback[pba->index_bg_ca2_trigger], pba->has_NEDE_trigger, storeidx);
 
     class_store_double(dataptr,pvecback[pba->index_bg_rho_scf],pba->has_scf,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_p_scf],pba->has_scf,storeidx);
