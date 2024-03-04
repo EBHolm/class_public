@@ -5377,33 +5377,6 @@ int perturbations_vector_init(
               }
             }
           }
-
-          if (pba->has_idr == _TRUE_){
-            if (ppw->approx[ppw->index_ap_rsa_idr] == (int)rsa_idr_off){
-
-              ppv->y[ppv->index_pt_delta_idr] =
-                ppw->pv->y[ppw->pv->index_pt_delta_idr];
-
-              ppv->y[ppv->index_pt_theta_idr] =
-                ppw->pv->y[ppw->pv->index_pt_theta_idr];
-
-              if (ppt->idr_nature == idr_free_streaming){
-
-                if (ppw->approx[ppw->index_ap_tca_idm_dr] == (int)tca_idm_dr_off){
-
-                  ppv->y[ppv->index_pt_shear_idr] =
-                    ppw->pv->y[ppw->pv->index_pt_shear_idr];
-
-                  ppv->y[ppv->index_pt_l3_idr] =
-                    ppw->pv->y[ppw->pv->index_pt_l3_idr];
-
-                  for (l=4; l <= ppv->l_max_idr; l++)
-                    ppv->y[ppv->index_pt_delta_idr+l] =
-                      ppw->pv->y[ppw->pv->index_pt_delta_idr+l];
-                }
-              }
-            }
-          }
           
           /*New EDE*/
           /*NEDE and trigger perturbations not affectecd by ncdm fluid approximation, so we just copy the values from the previous integration step.*/
@@ -5443,6 +5416,32 @@ int perturbations_vector_init(
             }
           }
 
+          if (pba->has_idr == _TRUE_){
+            if (ppw->approx[ppw->index_ap_rsa_idr] == (int)rsa_idr_off){
+
+              ppv->y[ppv->index_pt_delta_idr] =
+                ppw->pv->y[ppw->pv->index_pt_delta_idr];
+
+              ppv->y[ppv->index_pt_theta_idr] =
+                ppw->pv->y[ppw->pv->index_pt_theta_idr];
+
+              if (ppt->idr_nature == idr_free_streaming){
+
+                if (ppw->approx[ppw->index_ap_tca_idm_dr] == (int)tca_idm_dr_off){
+
+                  ppv->y[ppv->index_pt_shear_idr] =
+                    ppw->pv->y[ppw->pv->index_pt_shear_idr];
+
+                  ppv->y[ppv->index_pt_l3_idr] =
+                    ppw->pv->y[ppw->pv->index_pt_l3_idr];
+
+                  for (l=4; l <= ppv->l_max_idr; l++)
+                    ppv->y[ppv->index_pt_delta_idr+l] =
+                      ppw->pv->y[ppw->pv->index_pt_delta_idr+l];
+                }
+              }
+            }
+          }
 
           a = ppw->pvecback[pba->index_bg_a];
           index_pt = ppw->pv->index_pt_psi0_ncdm1;
@@ -8182,6 +8181,43 @@ int perturbations_total_stress_energy(
           theta_trigger = y[ppw->pv->index_pt_theta_trigger_fld];
         }
       }
+      
+      if ((ppw->approx[ppw->index_ap_CCa] == (int)CCa_off) && (ppw->approx[ppw->index_ap_sda] == (int)sda_off))
+       {
+         double w_NEDE, dw_over_da_NEDE, ca2_NEDE, cs2_NEDE;
+         class_call(background_quantities_NEDE(pba, a, a_prime_over_a, NULL, NULL, &w_NEDE, &dw_over_da_NEDE, &ca2_NEDE),
+                    pba->error_message,
+                    pba->error_message);
+         double w_prime_NEDE = dw_over_da_NEDE * a_prime_over_a * a;
+         /** Decide if effective rest-frame sound speed is constant or tracking the adiabatic sound speed (note that w_NEDE=const). */
+
+         if (pba->NEDE_fld_nature == NEDE_fld_A)
+         {
+           if (ppt->NEDE_ceff_nature == NEDE_ceff_const)
+             cs2_NEDE = ppt->three_ceff2_NEDE / 3.;
+           else
+             cs2_NEDE = ca2_NEDE;
+         }
+
+         ppw->delta_rho = ppw->delta_rho + ppw->pvecback[pba->index_bg_rho_NEDE] * delta_NEDE;
+
+         ppw->rho_plus_p_theta = ppw->rho_plus_p_theta + (1. + w_NEDE) * ppw->pvecback[pba->index_bg_rho_NEDE] * theta_NEDE;
+
+         ppw->rho_plus_p_shear = ppw->rho_plus_p_shear + (1. + w_NEDE) * ppw->pvecback[pba->index_bg_rho_NEDE] * shear_NEDE;
+
+         /*Compare to  arXiv: astro-ph/9801234v2, Eq. 3 and thereafter; use dictionnary theta/k = v.*/
+         ppw->delta_p += cs2_NEDE * ppw->pvecback[pba->index_bg_rho_NEDE] * delta_NEDE + (cs2_NEDE - ca2_NEDE) * (3. * a_prime_over_a * ((1. + w_NEDE) * ppw->pvecback[pba->index_bg_rho_NEDE] * theta_NEDE) / k / k);
+
+         /* This part is implemented overly correct as first case cannot happen*/
+         if (a < pba->a_decay)
+         {
+           ppw->rho_plus_p_tot += 0.0;
+         }
+         else
+         {
+           ppw->rho_plus_p_tot += (1. + w_NEDE) * ppw->pvecback[pba->index_bg_rho_NEDE];
+         }
+       }
     }
     
     /*Trigger contribution / like scalar field below*/
@@ -8222,7 +8258,9 @@ int perturbations_total_stress_energy(
       else if ((pba->has_NEDE_trigger_DM == _TRUE_) && (ppw->approx[ppw->index_ap_tfa] == (int)tfa_on))
       {
         // This is the case when the fluid approximation is used..
-        double cs2_trigger, ca2_trigger, w_trigger;
+        double cs2_trigger = 0;
+        double ca2_trigger = 0;
+        double w_trigger = 0;
         class_call(trigger_NEDE_cs2(pba, a, k, ppw->pvecback[pba->index_bg_H], &cs2_trigger),
                    pba->error_message,
                    pba->error_message);
@@ -10869,7 +10907,9 @@ int perturbations_derivs(double tau,
 
         else if ((pba->has_NEDE_trigger_DM == _TRUE_) && (ppw->approx[ppw->index_ap_tfa] == (int)tfa_on))
         {
-          double cs2_trigger, w_trigger, ca2_trigger;
+          double cs2_trigger = 0;
+          double w_trigger = 0;
+          double ca2_trigger = 0;
           // Get the sound speed.
           class_call(trigger_NEDE_cs2(pba, a, k, ppw->pvecback[pba->index_bg_H], &cs2_trigger),
                      pba->error_message,

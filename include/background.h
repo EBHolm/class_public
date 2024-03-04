@@ -230,6 +230,8 @@ struct background
   int index_bg_rho_trigger;       /**< trigger field energy density */
   int index_bg_p_trigger;         /**< trigger field pressure */
   int index_bg_p_prime_trigger;   /**< scalar field pressure */
+  int index_bg_w_trigger;
+  int index_bg_ca2_trigger;
 
   int index_bg_phi_scf;       /**< scalar field value */
   int index_bg_phi_prime_scf; /**< scalar field derivative wrt conformal time */
