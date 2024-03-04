@@ -548,13 +548,7 @@ int background_functions(
       // This part is relevant after the fluid approximation has been turned on.
       // Here we copy the fluid energy density from the integration vector and add it to rho_tot.
       pvecback[pba->index_bg_rho_trigger] = pvecback_B[pba->index_bi_rho_trigger];
-      // Everything else is not tracked; just set to zero.
-      pvecback[pba->index_bg_V_trigger] = V_trigger(pba, 0.);
-      pvecback[pba->index_bg_dV_trigger] = dV_trigger(pba, 0.);
-      pvecback[pba->index_bg_ddV_trigger] = ddV_trigger(pba, 0.);
-      pvecback[pba->index_bg_phi_trigger] = 0.;
-      pvecback[pba->index_bg_phi_prime_trigger] = 0.;
-      // index_bg_p_trigger is later in background_functions
+      // Everything is set below!
       
       // And add it to the total energy density.
       rho_tot += pvecback[pba->index_bg_rho_trigger];
@@ -664,6 +658,13 @@ int background_functions(
      // divide relativistic & nonrelativistic (not very meaningful for oscillatory models)
      rho_r += 3. * pvecback[pba->index_bg_p_trigger];                                       // field pressure contributes radiation
      rho_m += pvecback[pba->index_bg_rho_trigger] - 3. * pvecback[pba->index_bg_p_trigger]; // the rest contributes matter
+      
+      // Everything else is not tracked; just set to zero.
+      pvecback[pba->index_bg_V_trigger] = V_trigger(pba, 0.);
+      pvecback[pba->index_bg_dV_trigger] = dV_trigger(pba, 0.);
+      pvecback[pba->index_bg_ddV_trigger] = ddV_trigger(pba, 0.);
+      pvecback[pba->index_bg_phi_trigger] = sqrt(pvecback[pba->index_bg_rho_trigger] - pvecback[pba->index_bg_p_trigger])/pba->NEDE_trigger_mass;
+      pvecback[pba->index_bg_phi_prime_trigger] = sqrt(pvecback[pba->index_bg_rho_trigger] + pvecback[pba->index_bg_p_trigger]);
    }
   }
 
