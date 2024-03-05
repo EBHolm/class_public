@@ -3147,7 +3147,7 @@ int background_sources(
     if (H < pba->trigger_fluid_H_over_m*pba->NEDE_trigger_mass) {
       if (pba->a_trigger_fluid == 100.) {
         // Turn on NEDE trigger fluid approximation
-        printf("From BG Sources: Turned on FA at a=%g\n", a);
+        // printf("From BG Sources: Turned on FA at a=%g\n", a);
         pba->a_trigger_fluid = a;
         pba->H_fluid = H;
         pba->H_prime_fluid = bg_table_row[pba->index_bg_H_prime];
