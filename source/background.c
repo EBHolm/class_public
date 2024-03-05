@@ -3153,7 +3153,7 @@ int background_sources(
         pba->H_prime_fluid = bg_table_row[pba->index_bg_H_prime];
       }
       else if (pba->trigger_fluid_approximation == _FALSE_) {
-        if (a > pba->trigger_fluid_safety_factor*pba->a_trigger_fluid) { // 1.05 is a safety factor, same as in old TriggerCLASS
+        if (H*pba->trigger_fluid_safety_factor < pba->trigger_fluid_H_over_m*pba->NEDE_trigger_mass) { // 1.05 is a safety factor, same as in old TriggerCLASS
           pba->a_trigger_fluid_safe = a;
           return _APPROXIMATION_REACHED_;
         }
