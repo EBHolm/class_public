@@ -113,6 +113,8 @@ struct background
   double H_fluid;
   double H_prime_fluid;
   double a_trigger_fluid;
+  double a_trigger_fluid_safe;
+  double trigger_fluid_safety_factor;
   
 
   /* NEDE decay time */

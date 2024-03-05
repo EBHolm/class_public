@@ -3280,6 +3280,7 @@ int input_read_parameters_species(struct file_content * pfc,
     class_read_double("NEDE_trigger_fluid_H_m", pba->trigger_fluid_H_over_m);
     
     pba->phi_prime_ini_trigger = 0; // This value is set to the attractor later.
+    pba->trigger_fluid_safety_factor = 1.05;
 
     if (pba->NEDE_fld_nature == NEDE_fld_A)
       pba->Omega0_NEDE = pba->Omega_NEDE * pow(1. / (1. + pba->z_decay_NEDE), (3. + pba->three_eos_NEDE));

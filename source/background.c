@@ -2253,7 +2253,7 @@ int background_solve(
             (important to do this before changing indices in the next step) */
       double* pvecback;
       class_alloc(pvecback,pba->bg_size*sizeof(double),pba->error_message);
-      double a = pba->a_trigger_fluid;
+      double a = pba->a_trigger_fluid_safe;
       class_call(background_functions(pba, a, pvecback_integration, normal_info, pvecback),
                  pba->error_message,
                  pba->error_message);
@@ -2291,7 +2291,7 @@ int background_solve(
         new_pvecback_integration[index_bi_new] = pvecback_integration[index_bi_new + 1]; // +1 because new_pvecback has 1 less bi B variable defined
       }
       class_call(generic_evolver(background_derivs,
-                                 log(pba->a_trigger_fluid),
+                                 log(pba->a_trigger_fluid_safe),
                                  loga_final,
                                  new_pvecback_integration,
                                  used_in_output,
@@ -3144,14 +3144,20 @@ int background_sources(
   
   if (pba->has_NEDE_trigger) {
     double H = bg_table_row[pba->index_bg_H];
-    if ((H < pba->trigger_fluid_H_over_m*pba->NEDE_trigger_mass) && (pba->trigger_fluid_approximation == _FALSE_)) {
-      // Turn on NEDE trigger fluid approximation
-      printf("From BG Sources: Turned on FA at a=%g\n", a);
-      pba->a_trigger_fluid = a;
-      pba->H_fluid = H;
-      pba->H_prime_fluid = bg_table_row[pba->index_bg_H_prime];
-      // pba->trigger_fluid_approximation = _TRUE_;
-      return _APPROXIMATION_REACHED_;
+    if (H < pba->trigger_fluid_H_over_m*pba->NEDE_trigger_mass) {
+      if (pba->a_trigger_fluid == 100.) {
+        // Turn on NEDE trigger fluid approximation
+        printf("From BG Sources: Turned on FA at a=%g\n", a);
+        pba->a_trigger_fluid = a;
+        pba->H_fluid = H;
+        pba->H_prime_fluid = bg_table_row[pba->index_bg_H_prime];
+      }
+      else if (pba->trigger_fluid_approximation == _FALSE_) {
+        if (a > pba->trigger_fluid_safety_factor*pba->a_trigger_fluid) { // 1.05 is a safety factor, same as in old TriggerCLASS
+          pba->a_trigger_fluid_safe = a;
+          return _APPROXIMATION_REACHED_;
+        }
+      }
     }
   }
   return _SUCCESS_;
