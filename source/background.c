@@ -663,8 +663,10 @@ int background_functions(
       pvecback[pba->index_bg_V_trigger] = V_trigger(pba, 0.);
       pvecback[pba->index_bg_dV_trigger] = dV_trigger(pba, 0.);
       pvecback[pba->index_bg_ddV_trigger] = ddV_trigger(pba, 0.);
-      pvecback[pba->index_bg_phi_trigger] = sqrt(pvecback[pba->index_bg_rho_trigger] - pvecback[pba->index_bg_p_trigger])/pba->NEDE_trigger_mass;
-      pvecback[pba->index_bg_phi_prime_trigger] = sqrt(pvecback[pba->index_bg_rho_trigger] + pvecback[pba->index_bg_p_trigger]);
+      // pvecback[pba->index_bg_phi_trigger] = sqrt(pvecback[pba->index_bg_rho_trigger] - pvecback[pba->index_bg_p_trigger])/pba->NEDE_trigger_mass;
+      // pvecback[pba->index_bg_phi_prime_trigger] = sqrt(pvecback[pba->index_bg_rho_trigger] + pvecback[pba->index_bg_p_trigger]);
+      pvecback[pba->index_bg_phi_trigger] = 0.;
+      pvecback[pba->index_bg_phi_prime_trigger] = 0.;
    }
   }
 
