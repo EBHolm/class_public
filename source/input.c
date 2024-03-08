@@ -1308,7 +1308,7 @@ int input_get_guess(double *xguess,
         double z_NEDE = ba.z_decay_NEDE;
         double trigger_mass = 0.5 * ba.H0 / ba.Bubble_trigger_H_over_m * pow(1. / (1. - ba.f_NEDE), 0.5) * pow(Omega_M * pow((1. + z_NEDE), 3) + Omega_M * pow((1. + z_NEDE), 4) / (3001.) + (1. - Omega_M), 0.5);
         
-        xguess[index_guess] = pow(75. * ba.H0 * ba.H0 * pfzw->target_value[index_guess] * pow(z_NEDE, 3) / pow(trigger_mass, 2), 0.5);
+        xguess[index_guess] = 0.5*pow(75. * ba.H0 * ba.H0 * pfzw->target_value[index_guess] * pow(z_NEDE, 3) / pow(trigger_mass, 2), 0.5);
         dxdy[index_guess] = 0.5 * xguess[index_guess] / pfzw->target_value[index_guess];
         break;
       }
