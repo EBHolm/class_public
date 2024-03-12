@@ -3267,12 +3267,6 @@ int input_read_parameters_species(struct file_content * pfc,
     
     class_test(pba->z_decay_NEDE == 0, errmsg,
                "In input file, z_decay_NEDE  needs to be specified for NEDE (The trigger mass as input parameter has been retired in v5).");
-
-    class_test(pba->f_NEDE > 0.4, errmsg,
-               "Choose a smaller amount of NEDE as the code has not been tested for f_NEDE > 0.4.");
-    
-    class_test(pba->NEDE_trigger_ini < 0., errmsg,
-               "NEDE trigger field cannot run with negative initial value.");
     
     class_test(((pba->NEDE_trigger_ini == 0.) && (pba->Omega0_trigger == 0.)), errmsg,
                "You must input either 'NEDE_trigger_ini' or 'Omega0_NEDE_trigger_DM' to set the trigger density.")

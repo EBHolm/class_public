@@ -2044,6 +2044,14 @@ int background_checks(
                pba->error_message,
                "incorrect transition redshift");
   }
+  
+  if (pba->has_NEDE == _TRUE_) {
+    class_test(pba->f_NEDE > 0.4, pba->error_message,
+               "Choose a smaller amount of NEDE as the code has not been tested for f_NEDE > 0.4.");
+    
+    class_test(pba->NEDE_trigger_ini < 0., pba->error_message,
+               "NEDE trigger field cannot run with negative initial value.");
+  }
 
   /** - in verbose mode, send to standard output some additional information on non-obvious background parameters */
   if (pba->background_verbose > 0) {
