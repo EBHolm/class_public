@@ -421,13 +421,11 @@ int input_read_from_file(struct file_content * pfc,
              errmsg,
              errmsg);
 
-  /** If no shooting is necessary, initialize read parameters without it */
-  if (has_shooting == _FALSE_){
+  /** Update structs with input that is potentially updated after shooting */
     class_call(input_read_parameters(pfc,ppr,pba,pth,ppt,ptr,ppm,phr,pfo,ple,psd,pop,
                                      errmsg),
                errmsg,
                errmsg);
-  }
 
   /** Write info on the read/unread parameters. This is the correct place to do it,
       since we want it to happen after all the shooting business,
@@ -733,12 +731,6 @@ int input_shooting(struct file_content * pfc,
       fprintf(stdout,"Shooting completed using %d function evaluations\n",fevals);
     }
 
-    /** Read all parameters from the fc obtained through shooting */
-    class_call(input_read_parameters(&(fzw.fc),ppr,pba,pth,ppt,ptr,ppm,phr,pfo,ple,psd,pop,
-                                     errmsg),
-               errmsg,
-               errmsg);
-
     /** Set status of shooting */
     pba->shooting_failed = shooting_failed;
     if (pba->shooting_failed == _TRUE_) {
@@ -747,16 +739,12 @@ int input_shooting(struct file_content * pfc,
       perturbations_free_input(ppt);
     }
 
-    /* all parameters read in fzw must be considered as read in pfc. At the same
-       time the parameters read before in pfc (like theta_s,...) must still be
-       considered as read (hence we could not do a memcopy) */
-    for (i=0; i < pfc->size; i ++) {
-      if (fzw.fc.read[i] == _TRUE_)
-        pfc->read[i] = _TRUE_;
-    }
-
-    /* Free tuned pfc */
-    parser_free(&(fzw.fc));
+    /** Copy the tuned fzw to pfc */
+    pfc->name = fzw.fc.name;
+    pfc->value = fzw.fc.value;
+    pfc->size = fzw.fc.size;
+    pfc->read = fzw.fc.read;
+    free(fzw.fc.filename);
 
     /** Free arrays allocated */
     free(unknown_parameter);
@@ -854,23 +842,12 @@ int input_shooting(struct file_content * pfc,
               fzw.fc.name[pfc->size],
               fzw.fc.value[pfc->size]);
     }
-
-    /* Now read the remaining parameters from the fine tuned fzw into the individual structures */
-    class_call(input_read_parameters(&(fzw.fc),ppr,pba,pth,ppt,ptr,ppm,phr,pfo,ple,psd,pop,
-                                     errmsg),
-               errmsg,
-               errmsg);
-
-    /* all parameters read in fzw must be considered as read in pfc. At the same
-       time the parameters read before in pfc (like theta_s,...) must still be
-       considered as read (hence we could not do a memcopy) */
-    for (i=0; i < pfc->size; i ++) {
-      if (fzw.fc.read[i] == _TRUE_)
-        pfc->read[i] = _TRUE_;
-    }
-
-    /* Free tuned pfc */
-    parser_free(&(fzw.fc));
+  
+    free(fzw.fc.filename);
+    pfc->name = fzw.fc.name;
+    pfc->value = fzw.fc.value;
+    pfc->size = fzw.fc.size;
+    pfc->read = fzw.fc.read;
 
     /** Free arrays allocated */
     free(fzw.unknown_parameters_index);
