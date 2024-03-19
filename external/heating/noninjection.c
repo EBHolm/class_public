@@ -145,7 +145,7 @@ int noninjection_init(struct precision* ppr,
   pni->T_g0 = pba->T_cmb;                                                                           // [K]
   pni->Omega0_b = pba->Omega0_b;                                                                    // [-]
   pni->Omega0_cdm = pba->Omega0_cdm;                                                                // [-]
-  pni->rho0_cdm = pba->Omega0_cdm*pow(pni->H0,2)*3/8./_PI_/_G_*_c_*_c_;                             // [J/m^3]
+  pni->rho0_cdm = pba->Omega0_cdm*pow(pni->H0,2)*3/8./pba->pi/_G_*_c_*_c_;                             // [J/m^3]
 
   /* Thermodynamics structure */
   pni->fHe = pth->fHe;                                                                              // [-]
@@ -186,7 +186,7 @@ int noninjection_init(struct precision* ppr,
 
     dkappa = pvecthermo[pth->index_th_dkappa];                                                      // [1/Mpc]
     pni->dkD_dz = 1./(pvecback[pba->index_bg_H]*dkappa)*(16./15.+pow(R,2.)/(1.+R))/(6.*(1.0+R));    // [Mpc^2]
-    pni->kD = 2.*_PI_/pvecthermo[pth->index_th_r_d];                                                // [1/Mpc]
+    pni->kD = 2.*pba->pi/pvecthermo[pth->index_th_r_d];                                                // [1/Mpc]
     pni->T_b = pvecthermo[pth->index_th_Tb];                                                        // [K]
     pni->T_g = pni->T_g0/pni->a;                                                                    // [K]
     pni->x_e = pvecthermo[pth->index_th_xe];                                                        // [-]

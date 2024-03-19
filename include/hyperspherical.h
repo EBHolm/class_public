@@ -29,6 +29,7 @@ typedef struct HypersphericalInterpolationStructure{
   double *cotK;          //Vector of cot_K(xvec)
   double *phi;        //array of size nl*nx. [y_{l1}(x1) t_{l1}(x2)...]
   double *dphi;       //Same as phivec, but containing derivatives.
+  double pi;
 } HyperInterpStruct;
 
 struct WKB_parameters{
@@ -53,6 +54,7 @@ extern "C" {
                                 double sampling,
                                 int l_WKB,
                                 double phiminabs,
+                                double pi,
                                 HyperInterpStruct *pHIS,
                                 ErrorMsg error_message);
 
@@ -101,24 +103,25 @@ int hyperspherical_forwards_recurrence_chunk(int K,
                               double phiminabs,
                               double *xmin);
 
-  int hyperspherical_WKB(int K,int l,double beta,double y, double *Phi);
+  int hyperspherical_WKB(int K,int l,double beta,double y, double *Phi, double pi);
   int hyperspherical_WKB_vec(int l,
                              double beta,
                              double *sinK_vec,
                              int size_sinK_vec,
-                             double *Phi);
-  int ClosedModY(int l, int beta, double *y, int * phisign, int * dphisign);
+                             double *Phi,
+                             double pi);
+  int ClosedModY(int l, int beta, double *y, int * phisign, int * dphisign, double pi);
   int get_CF1(int K,int l,double beta, double cotK, double *CF, int *isign);
   int CF1_from_Gegenbauer(int l, int beta, double sinK, double cotK, double *CF);
-  double airy_cheb_approx(double z);
-  double coef1(double z);
+  double airy_cheb_approx(double z, double pi);
+  double coef1(double z, double pi);
   double coef2(double z);
   double coef3(double z);
   double coef4(double z);
   double cheb(double x, int n, const double A[]);
   double get_value_at_small_phi(int K,int l,double beta,double Phi);
 
-  double PhiWKB_minus_phiminabs(double x, void *param);
+  double PhiWKB_minus_phiminabs(double x, void *param, double pi);
 
   int hyperspherical_get_xmin_from_Airy(int K,
                                         int l,
@@ -126,6 +129,7 @@ int hyperspherical_forwards_recurrence_chunk(int K,
                                         double xtol,
                                         double phiminabs,
                                         double *xmin,
+                                        double pi,
                                         int *fevals
                                         );
 

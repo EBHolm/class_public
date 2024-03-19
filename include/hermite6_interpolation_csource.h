@@ -33,7 +33,7 @@ int phisign = 1, dphisign = 1;
     different functions, according to these flags. If not, maybe I should
     do it.
 */
-
+double pi = pHIS->pi;
 xvec = pHIS->x;
 sinK = pHIS->sinK;
 cotK = pHIS->cotK;
@@ -58,7 +58,7 @@ for (j=0; j<nxi; j++){
   x = xinterp[j];
   //take advantage of periodicity of functions in closed case
   if (pHIS->K==1)
-    ClosedModY(pHIS->l[lnum], (int)(pHIS->beta+0.2), &x, &phisign, &dphisign);
+    ClosedModY(pHIS->l[lnum], (int)(pHIS->beta+0.2), &x, &phisign, &dphisign, pi);
   //Loop over output values
   if ((x<xmin)||(x>xmax)){
     //Outside interpolation region, set to zero.

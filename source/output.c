@@ -1673,7 +1673,7 @@ int output_one_line_of_cl(
   int index_ct, index_ct_rest;
   double factor;
 
-  factor = l*(l+1)/2./_PI_;
+  factor = l*(l+1)/2./pba->pi;
 
   fprintf(clfile," ");
 

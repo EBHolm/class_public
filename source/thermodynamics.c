@@ -154,7 +154,7 @@ int thermodynamics_at_z(
       /* For DM-g calculate at early times the optical depth parameters */
       if (pth->has_idm_g == _TRUE_) {
         /* calculate dmu_idm_g and its derivatives */
-        pvecthermo[pth->index_th_dmu_idm_g] = 3./8./_PI_/_G_*pow(1.+z, 2+pth->n_index_idm_g)*pba->Omega0_idm*pba->H0*pba->H0*pth->u_idm_g*pow(_c_,4)*_sigma_/1.e11/_eV_/_Mpc_over_m_;
+        pvecthermo[pth->index_th_dmu_idm_g] = 3./8./pth->pi/_G_*pow(1.+z, 2+pth->n_index_idm_g)*pba->Omega0_idm*pba->H0*pba->H0*pth->u_idm_g*pow(_c_,4)*_sigma_/1.e11/_eV_/_Mpc_over_m_;
         pvecthermo[pth->index_th_ddmu_idm_g] = -(2.+pth->n_index_idm_g) * pvecback[pba->index_bg_H] * pvecback[pba->index_bg_a] * pvecthermo[pth->index_th_dmu_idm_g];
         pvecthermo[pth->index_th_dddmu_idm_g] = (2.+pth->n_index_idm_g)*pvecthermo[pth->index_th_dmu_idm_g]/(1.+z) *
           (pvecback[pba->index_bg_H]*pvecback[pba->index_bg_H]/(1.+z) * (1.+pth->n_index_idm_g) - pvecback[pba->index_bg_H_prime]);
@@ -179,7 +179,7 @@ int thermodynamics_at_z(
         /* Now compute the coupling coefficients */
         pvecthermo[pth->index_th_R_idm_b] = (pvecback[pba->index_bg_a]*pvecback[pba->index_bg_rho_b]*pth->cross_idm_b*pth->n_coeff_idm_b/(m_b+pth->m_idm))
           *pow(T_diff_idm_b,(pth->n_index_idm_b+1.0)/2.0)*FHe
-          *(3.e-4*pow(_c_,4.)/(8.*_PI_*_Mpc_over_m_*_G_*_eV_)); /* conversion coefficient for the units */
+          *(3.e-4*pow(_c_,4.)/(8.*pth->pi*_Mpc_over_m_*_G_*_eV_)); /* conversion coefficient for the units */
         pvecthermo[pth->index_th_dR_idm_b] = pvecthermo[pth->index_th_R_idm_b] * pvecback[pba->index_bg_a] * pvecback[pba->index_bg_H]
           * ( -2. - (1.+z) * (pth->n_index_idm_b+1.0)/2.0 * (pba->T_cmb*_k_B_/_eV_/m_b + pba->T_cmb*_k_B_/_eV_/pth->m_idm)/T_diff_idm_b);
       }
@@ -352,7 +352,7 @@ int thermodynamics_init(
   pth->fHe = pth->YHe/(_not4_ *(1.-pth->YHe));
 
   /** - infer number of hydrogen nuclei today in m**-3 */
-  pth->n_e = 3.*pow(pba->H0 * _c_ / _Mpc_over_m_,2)*pba->Omega0_b/(8.*_PI_*_G_*_m_H_)*(1.-pth->YHe);
+  pth->n_e = 3.*pow(pba->H0 * _c_ / _Mpc_over_m_,2)*pba->Omega0_b/(8.*pth->pi*_G_*_m_H_)*(1.-pth->YHe);
 
   /** - test whether all parameters are in the correct regime */
   class_call(thermodynamics_checks(ppr,pba,pth),
@@ -803,14 +803,14 @@ int thermodynamics_workspace_init(
   /* Hubble parameter today in SI units */
   ptw->SIunit_H0 = pba->H0 * _c_ / _Mpc_over_m_;
   /* H number density today in SI units*/
-  ptw->SIunit_nH0 = 3.*ptw->SIunit_H0*ptw->SIunit_H0*pba->Omega0_b/(8.*_PI_*_G_*_m_H_)*(1.-ptw->YHe);
+  ptw->SIunit_nH0 = 3.*ptw->SIunit_H0*ptw->SIunit_H0*pba->Omega0_b/(8.*pth->pi*_G_*_m_H_)*(1.-ptw->YHe);
   /* CMB temperature today in Kelvin */
   ptw->Tcmb = pba->T_cmb;
 
   /** - relevant constants */
 
   /* Prefactor in non-relativistic number density for temperature -- (2*pi*m_e) and unit conversion */
-  ptw->const_NR_numberdens = 2.*_PI_*(_m_e_/_h_P_)*(_k_B_/_h_P_);
+  ptw->const_NR_numberdens = 2.*pth->pi*(_m_e_/_h_P_)*(_k_B_/_h_P_);
   /* Ionization energy for HI -- temperature equivalent in Kelvin */
   ptw->const_Tion_H = _h_P_*_c_*_L_H_ion_/_k_B_;
   /* Ionization energy for HeI -- temperature equivalent in Kelvin */
@@ -1798,7 +1798,7 @@ int thermodynamics_output_summary(
   printf("    sound horizon angle 100*theta_s = %f\n",100.*pth->rs_rec/pth->ra_rec);
   if (pth->compute_damping_scale == _TRUE_) {
     printf("    comoving photon damping scale = %f Mpc\n",pth->rd_rec);
-    printf("    comoving damping wavenumber k_d = %f 1/Mpc\n",2.*_PI_/pth->rd_rec);
+    printf("    comoving damping wavenumber k_d = %f 1/Mpc\n",2.*pth->pi/pth->rd_rec);
   }
   printf("    Thomson optical depth crosses one at z_* = %f\n",pth->z_star);
   printf("    giving an angle 100*theta_* = %f\n",100.*pth->rs_star/pth->ra_star);
@@ -3327,7 +3327,7 @@ int thermodynamics_calculate_damping_scale(
   for (index_tau=0; index_tau < pth->tt_size; index_tau++) {
 
     pth->thermodynamics_table[index_tau*pth->th_size+pth->index_th_r_d] =
-      2.*_PI_*sqrt(16./(15.*6.*3.)*tau_ini/dkappa_ini
+      2.*pth->pi*sqrt(16./(15.*6.*3.)*tau_ini/dkappa_ini
                    +pth->thermodynamics_table[(pth->tt_size-1-index_tau)*pth->th_size+pth->index_th_g]);
 
   }
@@ -4546,7 +4546,7 @@ int thermodynamics_idm_quantities(struct background * pba,
     /* Now add also coupling to photons*/
     if (pth->has_idm_g == _TRUE_) {
       /* - photon interaction rate with idm_g */
-      ptdw->dmu_idm_g = 3./8./_PI_/_G_*pow(1.+z, 2+pth->n_index_idm_g)*pba->Omega0_idm*pba->H0*pba->H0*pth->u_idm_g*pow(_c_,4)*_sigma_/1.e11/_eV_/_Mpc_over_m_;
+      ptdw->dmu_idm_g = 3./8./pth->pi/_G_*pow(1.+z, 2+pth->n_index_idm_g)*pba->Omega0_idm*pba->H0*pba->H0*pth->u_idm_g*pow(_c_,4)*_sigma_/1.e11/_eV_/_Mpc_over_m_;
       ptdw->T_idm_prime += - 2.*4./3. * pvecback[pba->index_bg_rho_g]/pvecback[pba->index_bg_rho_idm] * ptdw->dmu_idm_g * (ptdw->T_idm  - T_g) / pvecback[pba->index_bg_H];
     }
     /* Now add also coupling to dark radiation */
@@ -4571,7 +4571,7 @@ int thermodynamics_idm_quantities(struct background * pba,
 
       ptdw->R_idm_b = (pvecback[pba->index_bg_a]*pvecback[pba->index_bg_rho_b]*pth->cross_idm_b*pth->n_coeff_idm_b/(m_b+pth->m_idm))
         *pow(T_diff_idm_b,(pth->n_index_idm_b+1.0)/2.0)*FHe
-        *(3.e-4*pow(_c_,4.)/(8.*_PI_*_Mpc_over_m_*_G_*_eV_));
+        *(3.e-4*pow(_c_,4.)/(8.*pth->pi*_Mpc_over_m_*_G_*_eV_));
 
       ptdw->T_idm_prime += -2.*pth->m_idm/(pth->m_idm + m_b)*ptdw->R_idm_b*(ptdw->T_idm-Tmat) / pvecback[pba->index_bg_H];
     }
@@ -4752,7 +4752,7 @@ int thermodynamics_idm_initial_temperature(
     T_diff_idm_b = (pba->T_cmb*(1.+z_ini)*_k_B_/_eV_/m_b)+(pba->T_cmb*(1.+z_ini)*_k_B_/_eV_/pth->m_idm)+(1.e-8/3.0);
     ptdw->R_idm_b = (pvecback[pba->index_bg_a]*pvecback[pba->index_bg_rho_b]*pth->cross_idm_b*pth->n_coeff_idm_b/(m_b+pth->m_idm))
       *pow(T_diff_idm_b,(pth->n_index_idm_b+1.0)/2.0)*FHe
-      *(3.e-4*pow(_c_,4.)/(8.*_PI_*_Mpc_over_m_*_G_*_eV_));
+      *(3.e-4*pow(_c_,4.)/(8.*pth->pi*_Mpc_over_m_*_G_*_eV_));
     alpha = 2.*pth->m_idm/(pth->m_idm + m_b)*ptdw->R_idm_b;
   }
 

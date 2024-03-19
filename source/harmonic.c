@@ -1054,7 +1054,7 @@ int harmonic_compute_cl(
 
     */
 
-    factor = 4. * _PI_ / k;
+    factor = 4. * pba->pi / k;
 
     if (phr->has_tt == _TRUE_)
       cl_integrand[index_q*cl_integrand_num_columns+1+phr->index_ct_tt]=

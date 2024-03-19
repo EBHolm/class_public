@@ -215,6 +215,7 @@ int lensing_init(
                                          w8,
                                          num_mu-1,
                                          ppr->tol_gauss_legendre,
+                                         ple->pi,
                                          ple->error_message),
                ple->error_message,
                ple->error_message);
@@ -224,7 +225,7 @@ int lensing_init(
 
   } else { /* Crude integration on [0,pi/16]: Riemann sum on theta */
 
-    delta_theta = _PI_/16. / (double)(num_mu-1);
+    delta_theta = ppt->pi/16. / (double)(num_mu-1);
     for (index_mu=0;index_mu<num_mu-1;index_mu++) {
       theta = (index_mu+1)*delta_theta;
       mu[index_mu] = cos(theta);
@@ -514,8 +515,8 @@ int lensing_init(
 
     }
 
-    Cgl[index_mu] /= 4.*_PI_;
-    Cgl2[index_mu] /= 4.*_PI_;
+    Cgl[index_mu] /= 4.*ppt->pi;
+    Cgl2[index_mu] /= 4.*ppt->pi;
 
   }
 
@@ -586,7 +587,7 @@ int lensing_init(
       ll = (double)l;
 
       fac = ll*(ll+1)/4.;
-      fac1 = (2*ll+1)/(4.*_PI_);
+      fac1 = (2*ll+1)/(4.*ppt->pi);
 
       /* In the following we will keep terms of the form (sigma2)^k*(Cgl2)^m
          with k+m <= 2 */
@@ -1065,7 +1066,7 @@ int lensing_lensed_cl_tt(
     for (imu=0;imu<nmu;imu++) {
       cle += ksi[imu]*d00[imu][(int)ple->l[index_l]]*w8[imu]; /* loop could be optimized */
     }
-    ple->cl_lens[index_l*ple->lt_size+ple->index_lt_tt]=cle*2.0*_PI_;
+    ple->cl_lens[index_l*ple->lt_size+ple->index_lt_tt]=cle*2.0*ple->pi;
   }
 
   return _SUCCESS_;
@@ -1128,7 +1129,7 @@ int lensing_lensed_cl_te(
     for (imu=0;imu<nmu;imu++) {
       clte += ksiX[imu]*d20[imu][(int)ple->l[index_l]]*w8[imu]; /* loop could be optimized */
     }
-    ple->cl_lens[index_l*ple->lt_size+ple->index_lt_te]=clte*2.0*_PI_;
+    ple->cl_lens[index_l*ple->lt_size+ple->index_lt_te]=clte*2.0*ple->pi;
   }
 
   return _SUCCESS_;
@@ -1196,8 +1197,8 @@ int lensing_lensed_cl_ee_bb(
       clp += ksip[imu]*d22[imu][(int)ple->l[index_l]]*w8[imu]; /* loop could be optimized */
       clm += ksim[imu]*d2m2[imu][(int)ple->l[index_l]]*w8[imu]; /* loop could be optimized */
     }
-    ple->cl_lens[index_l*ple->lt_size+ple->index_lt_ee]=(clp+clm)*_PI_;
-    ple->cl_lens[index_l*ple->lt_size+ple->index_lt_bb]=(clp-clm)*_PI_;
+    ple->cl_lens[index_l*ple->lt_size+ple->index_lt_ee]=(clp+clm)*ple->pi;
+    ple->cl_lens[index_l*ple->lt_size+ple->index_lt_bb]=(clp-clm)*ple->pi;
   }
 
   return _SUCCESS_;

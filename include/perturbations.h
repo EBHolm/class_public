@@ -174,6 +174,8 @@ struct perturbations
 
   double * alpha_idm_dr; /**< Angular contribution to collisional term at l>=2 for idm_fr-idr */
   double * beta_idr;  /**< Angular contribution to collisional term at l>=2 for idr-idr */
+  
+  double pi;
 
   int idr_nature; /**< Nature of the interacting dark radiation (free streaming or fluid) */
 

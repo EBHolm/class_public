@@ -144,7 +144,7 @@ struct transfer {
   int index_tt_nc_g3;   /**< index for first bin of transfer type = gravity term G3 for of number count */
   int index_tt_nc_g4;   /**< index for first bin of transfer type = gravity term G3 for of number count */
   int index_tt_nc_g5;   /**< index for first bin of transfer type = gravity term G3 for of number count */
-
+  double pi;
   int * tt_size;     /**< number of requested transfer types tt_size[index_md] for each mode */
 
   //@}
@@ -692,6 +692,7 @@ extern "C" {
                                                 double xtol,
                                                 double phiminabs,
                                                 double *x_nonzero,
+                                                double pi,
                                                 int *fevals),
                         int sgnK,
                         double nu,
@@ -702,6 +703,7 @@ extern "C" {
                         double xtol,
                         int *index_l_left,
                         int *index_l_right,
+                        double pi,
                         ErrorMsg error_message);
 
   int transfer_precompute_selection(

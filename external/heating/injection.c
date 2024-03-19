@@ -48,7 +48,7 @@ int injection_init(struct precision * ppr,
   pin->T_g0 = pba->T_cmb;                                                                           // [K]
   pin->Omega0_b = pba->Omega0_b;                                                                    // [-]
   pin->Omega0_cdm = pba->Omega0_cdm;                                                                // [-]
-  pin->rho0_cdm = pba->Omega0_cdm*pow(pin->H0,2)*3/8./_PI_/_G_*_c_*_c_;                             // [J/m^3]
+  pin->rho0_cdm = pba->Omega0_cdm*pow(pin->H0,2)*3/8./pba->pi/_G_*_c_*_c_;                             // [J/m^3]
 
   /* Thermodynamics structure */
   pin->fHe = pth->fHe;                                                                              // [-]

@@ -2177,7 +2177,7 @@ int perturbations_get_k_list(
 
     /** - --> find k_max (as well as k_max_cmb[ppt->index_md_scalars], k_max_cl[ppt->index_md_scalars]) */
 
-    k_rec = 2. * _PI_ / pth->rs_rec; /* comoving scale corresponding to sound horizon at recombination */
+    k_rec = 2. * ppt->pi / pth->rs_rec; /* comoving scale corresponding to sound horizon at recombination */
 
     k_max_cmb[ppt->index_md_scalars] = k_min;
     k_max_cl[ppt->index_md_scalars] = k_min;
@@ -2392,7 +2392,7 @@ int perturbations_get_k_list(
 
     /** - --> find k_max (as well as k_max_cmb[ppt->index_md_vectors], k_max_cl[ppt->index_md_vectors]) */
 
-    k_rec = 2. * _PI_ / pth->rs_rec; /* comoving scale corresponding to sound horizon at recombination */
+    k_rec = 2. * ppt->pi / pth->rs_rec; /* comoving scale corresponding to sound horizon at recombination */
 
     k_max_cmb[ppt->index_md_vectors] = k_min;
     k_max_cl[ppt->index_md_vectors] = k_min;
@@ -2526,7 +2526,7 @@ int perturbations_get_k_list(
 
     /** - --> find k_max (as well as k_max_cmb[ppt->index_md_tensors], k_max_cl[ppt->index_md_tensors]) */
 
-    k_rec = 2. * _PI_ / pth->rs_rec; /* comoving scale corresponding to sound horizon at recombination */
+    k_rec = 2. * ppt->pi / pth->rs_rec; /* comoving scale corresponding to sound horizon at recombination */
 
     k_max_cmb[ppt->index_md_tensors] = k_min;
     k_max_cl[ppt->index_md_tensors] = k_min;
@@ -6052,7 +6052,7 @@ int perturbations_initial_conditions(struct precision * ppr,
 
     if (pba->sgnK == -1) {
       if (k*k+3*pba->K >= 0.) {
-        ppw->pv->y[ppw->pv->index_pt_gw] *= sqrt(tanh(_PI_/2.*sqrt(k2+3*pba->K)/sqrt(-pba->K)));
+        ppw->pv->y[ppw->pv->index_pt_gw] *= sqrt(tanh(ppt->pi/2.*sqrt(k2+3*pba->K)/sqrt(-pba->K)));
       }
       else {
         ppw->pv->y[ppw->pv->index_pt_gw] = 0.;
@@ -8934,7 +8934,7 @@ int perturbations_derivs(double tau,
       H0 = pba->H0 * _c_ / _Mpc_over_m_;
 
       //Computation of Nnow in SI units
-      Nnow = 3.*H0*H0*pba->Omega0_b*(1.-pth->YHe)/(8.*_PI_*_G_*_m_H_);
+      Nnow = 3.*H0*H0*pba->Omega0_b*(1.-pth->YHe)/(8.*ppt->pi*_G_*_m_H_);
 
       // total amount of hydrogen today
       n_H = Nnow/pow(a,3);
@@ -8943,7 +8943,7 @@ int perturbations_derivs(double tau,
       fHe = pth->YHe / (_not4_*(1-pth->YHe));
 
       // The constant such that rho_gamma = a_rad * T^4
-      a_rad = 8./15.*pow(_PI_,5)*pow(_k_B_,4)/pow(_c_*_h_P_,3);
+      a_rad = 8./15.*pow(ppt->pi,5)*pow(_k_B_,4)/pow(_c_*_h_P_,3);
 
       // Compton cooling rate in Mpc^(-1)
       Compton_CR = 8./3. *_sigma_ * a_rad /(_m_e_ * _c_ *_c_) *_Mpc_over_m_   ;

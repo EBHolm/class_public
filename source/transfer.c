@@ -211,7 +211,7 @@ int transfer_init(
 
   /** - order of magnitude of the oscillation period of transfer functions */
 
-  q_period = 2.*_PI_/(tau0-tau_rec)*ptr->angular_rescaling;
+  q_period = 2.*ptr->pi/(tau0-tau_rec)*ptr->angular_rescaling;
 
   /** - initialize all indices in the transfer structure and
       allocate all its arrays using transfer_indices() */
@@ -273,6 +273,7 @@ int transfer_init(
                                        ppr->hyper_sampling_flat,
                                        ptr->l[ptr->l_size_max-1]+1,
                                        ppr->hyper_phi_min_abs,
+                                       ptr->pi,
                                        &BIS,
                                        ptr->error_message),
              ptr->error_message,
@@ -2447,7 +2448,7 @@ int transfer_selection_function(
   if (ppt->selection==gaussian) {
 
     *selection = exp(-0.5*pow(x/ppt->selection_width[bin],2))
-      /ppt->selection_width[bin]/sqrt(2.*_PI_);
+      /ppt->selection_width[bin]/sqrt(2.*ptr->pi);
 
     if ((ptr->has_nz_file == _TRUE_) || (ptr->has_nz_analytic == _TRUE_)) {
 
@@ -3421,7 +3422,7 @@ int transfer_limber(
         = source*[tau0-tau] * \f$ \sqrt{\pi/(2l+1)}/(l+1/2)\f$
     */
 
-    IPhiFlat = sqrt(_PI_/(2.*l))*(1.-0.25/l+1./32./(l*l));
+    IPhiFlat = sqrt(ptr->pi/(2.*l))*(1.-0.25/l+1./32./(l*l));
 
     *trsf = IPhiFlat*S;
 
@@ -3461,8 +3462,8 @@ int transfer_limber(
                ptr->error_message);
 
     *trsf =
-      -sqrt(_PI_/(2.*l+3.))*Sp/(l+1.5) * (l+1.)/(2.*l+1)
-      +sqrt(_PI_/(2.*l-1.))*Sm/(l-0.5) * l/(2.*l+1.);
+      -sqrt(ptr->pi/(2.*l+3.))*Sp/(l+1.5) * (l+1.)/(2.*l+1)
+      +sqrt(ptr->pi/(2.*l-1.))*Sm/(l-0.5) * l/(2.*l+1.);
 
   }
 
@@ -3502,9 +3503,9 @@ int transfer_limber(
                ptr->error_message);
 
     *trsf =
-      sqrt(_PI_/(2.*l+5.))*Sp/(l+2.5) * l*(l+2.)/(2.*l+1.)/(2.*l+3.)
-      -sqrt(_PI_/(2.*l+1.))*S/(l+0.5) * l/(2.*l+1.)*(l/(2.*l-1.)+(l+1.)/(2.*l+3.))
-      +sqrt(_PI_/(2.*l-3.))*Sm/(l-1.5) * l*(l-1.)/(2.*l+1.)/(2.*l-1.);
+      sqrt(ptr->pi/(2.*l+5.))*Sp/(l+2.5) * l*(l+2.)/(2.*l+1.)/(2.*l+3.)
+      -sqrt(ptr->pi/(2.*l+1.))*S/(l+0.5) * l/(2.*l+1.)*(l/(2.*l-1.)+(l+1.)/(2.*l+3.))
+      +sqrt(ptr->pi/(2.*l-3.))*Sm/(l-1.5) * l*(l-1.)/(2.*l+1.)/(2.*l-1.);
 
   }
 
@@ -3666,7 +3667,7 @@ int transfer_limber2(
 
   /** - get transfer from 2nd order Limber approx (inferred from 0809.5112 [astro-ph]) */
 
-  *trsf = sqrt(_PI_/(2.*l+1.))/k*((1.-3./2./(2.*l+1.)/(2.*l+1.))*S+dS/k/(2.*l+1.)-0.5*ddS/k/k);
+  *trsf = sqrt(ptr->pi/(2.*l+1.))/k*((1.-3./2./(2.*l+1.)/(2.*l+1.))*S+dS/k/(2.*l+1.)-0.5*ddS/k/k);
 
   return _SUCCESS_;
 
@@ -4350,7 +4351,7 @@ int transfer_update_HIS(
     nu = ptr->q[index_q]/sqrt_absK;
 
     if (ptw->sgnK == 1) {
-      xmax = MIN(xmax,_PI_/2.0-ppr->hyper_x_min); //We only need solution on [0;pi/2]
+      xmax = MIN(xmax,ptr->pi/2.0-ppr->hyper_x_min); //We only need solution on [0;pi/2]
 
       int_nu = (int)(nu+0.2);
       new_nu = (double)int_nu;
@@ -4389,6 +4390,7 @@ int transfer_update_HIS(
                                    xtol,
                                    &index_l_left,
                                    &index_l_right,
+                                   ptr->pi,
                                    ptr->error_message),
                  ptr->error_message,
                  ptr->error_message);
@@ -4404,6 +4406,7 @@ int transfer_update_HIS(
                                    xtol,
                                    &index_l_left,
                                    &index_l_right,
+                                   ptr->pi,
                                    ptr->error_message),
                  ptr->error_message,
                  ptr->error_message);
@@ -4424,6 +4427,7 @@ int transfer_update_HIS(
                                          sampling,
                                          ptr->l[l_size_max-1]+1,
                                          ppr->hyper_phi_min_abs,
+                                         ptr->pi,
                                          &(ptw->HIS),
                                          ptr->error_message),
                ptr->error_message,
@@ -4442,6 +4446,7 @@ int transfer_get_lmax(int (*get_xmin_generic)(int sgnK,
                                               double xtol,
                                               double phiminabs,
                                               double *x_nonzero,
+                                              double pi,
                                               int *fevals),
                       int sgnK,
                       double nu,
@@ -4452,6 +4457,7 @@ int transfer_get_lmax(int (*get_xmin_generic)(int sgnK,
                       double xtol,
                       int *index_l_left,
                       int *index_l_right,
+                      double pi,
                       ErrorMsg error_message){
   double x_nonzero;
   int fevals=0, index_l_mid;
@@ -4464,6 +4470,7 @@ int transfer_get_lmax(int (*get_xmin_generic)(int sgnK,
                               xtol,
                               phiminabs,
                               &x_nonzero,
+                              pi,
                               &fevals),
              error_message,
              error_message);
@@ -4479,6 +4486,7 @@ int transfer_get_lmax(int (*get_xmin_generic)(int sgnK,
                               xtol,
                               phiminabs,
                               &x_nonzero,
+                              pi,
                               &fevals),
              error_message,
              error_message);
@@ -4498,6 +4506,7 @@ int transfer_get_lmax(int (*get_xmin_generic)(int sgnK,
                                 xtol,
                                 phiminabs,
                                 &x_nonzero,
+                                pi,
                                 &fevals),
                error_message,
                error_message);
@@ -4529,6 +4538,7 @@ int transfer_get_lmax(int (*get_xmin_generic)(int sgnK,
                                   xtol,
                                   phiminabs,
                                   &x_nonzero,
+                                  pi,
                                   &fevals),
                  error_message,
                  error_message);
@@ -4563,6 +4573,7 @@ int transfer_get_lmax(int (*get_xmin_generic)(int sgnK,
                                 xtol,
                                 phiminabs,
                                 &x_nonzero,
+                                pi,
                                 &fevals),
                error_message,
                error_message);

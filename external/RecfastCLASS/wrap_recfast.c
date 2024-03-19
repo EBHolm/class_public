@@ -78,9 +78,9 @@ int recfast_init(struct precision* ppr,
   pre->CB1_He1 = _h_P_*_c_*_L_He1_ion_/_k_B_;     // equivalent to ptw->const_Tion_HeI
   pre->CB1_He2 = _h_P_*_c_*_L_He2_ion_/_k_B_;     // equivalent to ptw->const_Tion_HeII
   /* Constants defined for the Peeble's factors  */
-  pre->CR = 2.*_PI_*(_m_e_/_h_P_)*(_k_B_/_h_P_);  // equivalent to ptw->const_NR_numberdens
-  pre->CK = pow(Lalpha,3)/(8.*_PI_);
-  pre->CK_He = pow(Lalpha_He,3)/(8.*_PI_);
+  pre->CR = 2.*pba->pi*(_m_e_/_h_P_)*(_k_B_/_h_P_);  // equivalent to ptw->const_NR_numberdens
+  pre->CK = pow(Lalpha,3)/(8.*pba->pi);
+  pre->CK_He = pow(Lalpha_He,3)/(8.*pba->pi);
   /* Lyman alpha temperature */
   pre->CL = _c_*_h_P_/(_k_B_*Lalpha);
   pre->CL_He = _c_*_h_P_/(_k_B_/_L_He_2s_);
@@ -266,7 +266,7 @@ int recfast_dx_He_dz(struct thermodynamics* pth, struct thermorecfast * pre, dou
       Doppler = 2.*_k_B_*Tmat/(_m_H_*_not4_*_c_*_c_);
       Doppler = _c_*_L_He_2p_*sqrt(Doppler);
       gamma_2Ps = 3.*_A2P_s_*pre->fHe*(1.-x_He)*_c_*_c_
-          /(sqrt(_PI_)*_sigma_He_2Ps_*8.*_PI_*Doppler*(1.-x_H))
+          /(sqrt(pth->pi)*_sigma_He_2Ps_*8.*pth->pi*Doppler*(1.-x_H))
           /pow(_c_*_L_He_2p_,2);
       pb = 0.36;
       qb = pre->fudge_He;
@@ -293,7 +293,7 @@ int recfast_dx_He_dz(struct thermodynamics* pth, struct thermorecfast * pre, dou
         Rup_trip *= pre->fsR*pre->fsR*pre->fsR*pre->fsR*pre->fsR*pre->meR;
       }
 
-      tauHe_t = _A2P_t_*n_He*(1.-x_He)*3./(8.*_PI_*Hz*pow(_L_He_2Pt_,3));
+      tauHe_t = _A2P_t_*n_He*(1.-x_He)*3./(8.*pth->pi*Hz*pow(_L_He_2Pt_,3));
       pHe_t = (1. - exp(-tauHe_t))/tauHe_t;
       CL_PSt = _h_P_*_c_*(_L_He_2Pt_ - _L_He_2St_)/_k_B_;
       /* In triple He default mode, or mode 5, take simple term */
@@ -306,7 +306,7 @@ int recfast_dx_He_dz(struct thermodynamics* pth, struct thermorecfast * pre, dou
         Doppler = 2.*_k_B_*Tmat/(_m_H_*_not4_*_c_*_c_);
         Doppler = _c_*_L_He_2Pt_*sqrt(Doppler);
         gamma_2Pt = 3.*_A2P_t_*pre->fHe*(1.-x_He)*_c_*_c_
-          /(sqrt(_PI_)*_sigma_He_2Pt_*8.*_PI_*Doppler*(1.-x_H))
+          /(sqrt(pth->pi)*_sigma_He_2Pt_*8.*pth->pi*Doppler*(1.-x_H))
           /pow(_c_*_L_He_2Pt_,2);
         pb = 0.66;
         qb = 0.9;

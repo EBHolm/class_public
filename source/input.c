@@ -2307,6 +2307,11 @@ int input_read_parameters_general(struct file_content * pfc,
     /* 10.b) Sensitivity of bbn to a variation of the fine structure constant */
     class_read_double("bbn_alpha_sensitivity",pth->bbn_alpha_sensitivity);
   }
+  
+  pba->pi = 3.1415926535897932384626433832795; // Default value
+  class_read_double("pi", pba->pi);
+  pth->pi = pba->pi;
+  ppt->pi = pba->pi;
 
   return _SUCCESS_;
 
@@ -2353,7 +2358,7 @@ int input_read_parameters_species(struct file_content * pfc,
   double Omega_m_remaining = 0.;
 
 
-  sigma_B = 2.*pow(_PI_,5.)*pow(_k_B_,4.)/15./pow(_h_P_,3.)/pow(_c_,2);  // [W/(m^2 K^4) = Kg/(K^4 s^3)]
+  sigma_B = 2.*pow(pba->pi,5.)*pow(_k_B_,4.)/15./pow(_h_P_,3.)/pow(_c_,2);  // [W/(m^2 K^4) = Kg/(K^4 s^3)]
 
   /** 1) Omega_0_g (photons) and T_cmb */
   /* Read */
@@ -2374,20 +2379,20 @@ int input_read_parameters_species(struct file_content * pfc,
      rho_g = (4 sigma_B/c) T^4
      rho_c0 = 3 c^2 H_0^2/(8 \pi G) */
   if (class_none_of_three(flag1,flag2,flag3)){
-    pba->Omega0_g = (4.*sigma_B/_c_*pow(pba->T_cmb,4.))/(3.*_c_*_c_*1.e10*pba->h*pba->h/_Mpc_over_m_/_Mpc_over_m_/8./_PI_/_G_);
+    pba->Omega0_g = (4.*sigma_B/_c_*pow(pba->T_cmb,4.))/(3.*_c_*_c_*1.e10*pba->h*pba->h/_Mpc_over_m_/_Mpc_over_m_/8./pba->pi/_G_);
   }
   else {
     if (flag1 == _TRUE_){
-      pba->Omega0_g = (4.*sigma_B/_c_*pow(param1,4.))/(3.*_c_*_c_*1.e10*pba->h*pba->h/_Mpc_over_m_/_Mpc_over_m_/8./_PI_/_G_);
+      pba->Omega0_g = (4.*sigma_B/_c_*pow(param1,4.))/(3.*_c_*_c_*1.e10*pba->h*pba->h/_Mpc_over_m_/_Mpc_over_m_/8./pba->pi/_G_);
       pba->T_cmb=param1;
     }
     if (flag2 == _TRUE_){
       pba->Omega0_g = param2;
-      pba->T_cmb = pow(pba->Omega0_g*(3.*_c_*_c_*1.e10*pba->h*pba->h/_Mpc_over_m_/_Mpc_over_m_/8./_PI_/_G_)/(4.*sigma_B/_c_),0.25);
+      pba->T_cmb = pow(pba->Omega0_g*(3.*_c_*_c_*1.e10*pba->h*pba->h/_Mpc_over_m_/_Mpc_over_m_/8./pba->pi/_G_)/(4.*sigma_B/_c_),0.25);
     }
     if (flag3 == _TRUE_){
       pba->Omega0_g = param3/pba->h/pba->h;
-      pba->T_cmb = pow(pba->Omega0_g*(3.*_c_*_c_*1.e10*pba->h*pba->h/_Mpc_over_m_/_Mpc_over_m_/8./_PI_/_G_)/(4.*sigma_B/_c_),0.25);
+      pba->T_cmb = pow(pba->Omega0_g*(3.*_c_*_c_*1.e10*pba->h*pba->h/_Mpc_over_m_/_Mpc_over_m_/8./pba->pi/_G_)/(4.*sigma_B/_c_),0.25);
     }
   }
   class_test(pba->Omega0_g<0,errmsg,"You cannot set the photon density to negative values.");
@@ -3077,7 +3082,7 @@ int input_read_parameters_species(struct file_content * pfc,
                  errmsg,
                  "The index for the DM-baryon interaction must be an integer between -4 and 4, you passed n_index_idm_b = %d.", pth->n_index_idm_b);
       /* The following formula is taken from Dvorkin et al. (2013) */
-      pth->n_coeff_idm_b = (pow(2.,(pth->n_index_idm_b+5.)/2.)*tgamma(3.+pth->n_index_idm_b/2.))/(3.*sqrt(_PI_));
+      pth->n_coeff_idm_b = (pow(2.,(pth->n_index_idm_b+5.)/2.)*tgamma(3.+pth->n_index_idm_b/2.))/(3.*sqrt(pba->pi));
     }
   }
 
@@ -3666,7 +3671,7 @@ int input_read_parameters_nonlinear(struct file_content * pfc,
   int flag1,flag2,flag3;
   double param1,param2,param3;
   char string1[_ARGUMENT_LENGTH_MAX_];
-
+  pfo->pi = pba->pi;
   /** 1) Non-linearity */
   /* Read */
   class_call(parser_read_string(pfc,"non_linear",&string1,&flag1,errmsg),
@@ -4060,6 +4065,9 @@ int input_read_parameters_primordial(struct file_content * pfc,
                errmsg,
                errmsg);
   }
+  
+  ppm->pi = ppt->pi;
+  
   /* Compatibility code END */
   /* Complete set of parameters */
   if (flag1 == _TRUE_) {
@@ -4275,11 +4283,11 @@ int input_read_parameters_primordial(struct file_content * pfc,
                    "inconsistent parametrization of polynomial inflation potential");
         /* Complete set of parameters */
         R0 = PSR0;
-        R1 = PSR1*16.*_PI_;
-        R2 = PSR2*8.*_PI_;
-        R3 = PSR3*pow(8.*_PI_,2);
-        R4 = PSR4*pow(8.*_PI_,3);
-        ppm->V0 = R0*R1*3./128./_PI_;
+        R1 = PSR1*16.*ppt->pi;
+        R2 = PSR2*8.*ppt->pi;
+        R3 = PSR3*pow(8.*ppt->pi,2);
+        R4 = PSR4*pow(8.*ppt->pi,3);
+        ppm->V0 = R0*R1*3./128./ppt->pi;
         ppm->V1 = -sqrt(R1)*ppm->V0;
         ppm->V2 = R2*ppm->V0;
         ppm->V3 = R3*ppm->V0*ppm->V0/ppm->V1;
@@ -4309,7 +4317,7 @@ int input_read_parameters_primordial(struct file_content * pfc,
                      errmsg,
                      "inconsistent parametrization of polynomial inflation potential");
           /* Complete set of parameters */
-          ppm->V0 = R0*R1*3./128./_PI_;
+          ppm->V0 = R0*R1*3./128./ppt->pi;
           ppm->V1 = -sqrt(R1)*ppm->V0;
           ppm->V2 = R2*ppm->V0;
           ppm->V3 = R3*ppm->V0*ppm->V0/ppm->V1;
@@ -4344,11 +4352,11 @@ int input_read_parameters_primordial(struct file_content * pfc,
         class_read_double("HSR_3",HSR3);
         class_read_double("HSR_4",HSR4);
         /* Complete set of parameters */
-        ppm->H0 = sqrt(HSR0*HSR1*_PI_);
-        ppm->H1 = -sqrt(4.*_PI_*HSR1)*ppm->H0;
-        ppm->H2 = 4.*_PI_*HSR2*ppm->H0;
-        ppm->H3 = 4.*_PI_*HSR3*ppm->H0*ppm->H0/ppm->H1;
-        ppm->H4 = 4.*_PI_*HSR4*ppm->H0*ppm->H0*ppm->H0/ppm->H1/ppm->H1;
+        ppm->H0 = sqrt(HSR0*HSR1*ppt->pi);
+        ppm->H1 = -sqrt(4.*ppt->pi*HSR1)*ppm->H0;
+        ppm->H2 = 4.*ppt->pi*HSR2*ppm->H0;
+        ppm->H3 = 4.*ppt->pi*HSR3*ppm->H0*ppm->H0/ppm->H1;
+        ppm->H4 = 4.*ppt->pi*HSR4*ppm->H0*ppm->H0*ppm->H0/ppm->H1/ppm->H1;
 
       }
       else {
@@ -4654,7 +4662,7 @@ int input_read_parameters_spectra(struct file_content * pfc,
   int i;
   double z_max=0.;
   int bin;
-
+  ptr->pi = pba->pi;
   /** 1) Maximum l for CLs */
   /* Read */
   if (ppt->has_cls == _TRUE_) {
@@ -5026,6 +5034,8 @@ int input_read_parameters_lensing(struct file_content * pfc,
     class_read_double("lcmb_tilt",ptr->lcmb_tilt);
     class_read_double("lcmb_pivot",ptr->lcmb_pivot);
   }
+  
+  ple->pi = ppt->pi;
 
   return _SUCCESS_;
 
@@ -5598,7 +5608,7 @@ int input_default_params(struct background *pba,
   struct injection* pin = &(pth->in);
   double sigma_B; /* Stefan-Boltzmann constant in \f$ W/m^2/K^4 = Kg/K^4/s^3 \f$*/
 
-  sigma_B = 2. * pow(_PI_,5) * pow(_k_B_,4) / 15. / pow(_h_P_,3) / pow(_c_,2);
+  sigma_B = 2. * pow(pba->pi,5) * pow(_k_B_,4) / 15. / pow(_h_P_,3) / pow(_c_,2);
 
   /* 24.02.2021: default parameters.
      If you want to use exactly the Planck 2018 bestfit model, you can always use one of our
@@ -5721,7 +5731,7 @@ int input_default_params(struct background *pba,
 
   /** 1) Photon density */
   pba->T_cmb = 2.7255;
-  pba->Omega0_g = (4.*sigma_B/_c_*pow(pba->T_cmb,4.)) / (3.*_c_*_c_*1.e10*pba->h*pba->h/_Mpc_over_m_/_Mpc_over_m_/8./_PI_/_G_);
+  pba->Omega0_g = (4.*sigma_B/_c_*pow(pba->T_cmb,4.)) / (3.*_c_*_c_*1.e10*pba->h*pba->h/_Mpc_over_m_/_Mpc_over_m_/8./pba->pi/_G_);
 
   /** 2) Baryon density */
   pba->Omega0_b = 0.02238280/pow(pba->h,2);

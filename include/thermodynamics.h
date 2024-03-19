@@ -174,6 +174,8 @@ struct thermodynamics
   /** parameters for varying fundamental constants */
 
   short has_varconst; /**< presence of varying fundamental constants? */
+  
+  double pi; // varying pi
 
   //@}
 

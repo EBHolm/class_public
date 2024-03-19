@@ -50,7 +50,7 @@ struct fourier {
   double z_infinity; /** for HMcode: z value at which Dark Energy correction is evaluated needs to be at early times (default */
 
   short has_pk_eq;  /**< flag: in case wa_fld is defined and non-zero, should we use the pk_eq method? */
-
+  double pi;
   //@}
 
   /** @name - information on number of modes and pairs of initial conditions */

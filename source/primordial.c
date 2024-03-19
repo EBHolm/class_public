@@ -1004,9 +1004,9 @@ int primordial_inflation_potential(
     // mu = bar(mu)/M_P
     // phi = -chi/M_P
 
-    e = exp(2./sqrt(6.)*sqrt(8.*_PI_)*phi);
-    de = 2./sqrt(6.)*sqrt(8.*_PI_)*e;
-    dde = 2./3. * 8.*_PI_ * e;
+    e = exp(2./sqrt(6.)*sqrt(8.*ppm->pi)*phi);
+    de = 2./sqrt(6.)*sqrt(8.*ppm->pi)*e;
+    dde = 2./3. * 8.*ppm->pi * e;
 
     mu = pow(1.-e,0.5);
     dmu = -0.5*de*pow(1.-e,-0.5);
@@ -1020,9 +1020,9 @@ int primordial_inflation_potential(
     dp = 2.*dl*l;
     ddp = 2.*ddl*l+2.*dl*dl;
 
-    *V = ppm->V0/4./pow(8.*_PI_,2)/ppm->V1/ppm->V1*p*pow(mu,4);
-    *dV = ppm->V0/4./pow(8.*_PI_,2)/ppm->V1/ppm->V1*(dp*pow(mu,4)+4.*p*dmu*pow(mu,3));
-    *ddV = ppm->V0/4./pow(8.*_PI_,2)/ppm->V1/ppm->V1*(ddp*pow(mu,4)+8.*dp*dmu*pow(mu,3)+4.*p*ddmu*pow(mu,3)+12.*p*pow(dmu*mu,2));
+    *V = ppm->V0/4./pow(8.*ppm->pi,2)/ppm->V1/ppm->V1*p*pow(mu,4);
+    *dV = ppm->V0/4./pow(8.*ppm->pi,2)/ppm->V1/ppm->V1*(dp*pow(mu,4)+4.*p*dmu*pow(mu,3));
+    *ddV = ppm->V0/4./pow(8.*ppm->pi,2)/ppm->V1/ppm->V1*(ddp*pow(mu,4)+8.*dp*dmu*pow(mu,3)+4.*p*ddmu*pow(mu,3)+12.*p*pow(dmu*mu,2));
 
     //fprintf(stderr,"%e  %e  %e\n",*V,p,mu);
 
@@ -1565,8 +1565,8 @@ int primordial_inflation_analytic_spectra(
                ppm->error_message);
 
     /** - calculate the analytic slow-roll formula for the spectra */
-    curvature = 128.*_PI_/3.*pow(V,3)/pow(dV,2);
-    tensors = pow(dV/V,2)/_PI_*128.*_PI_/3.*pow(V,3)/pow(dV,2);
+    curvature = 128.*ppm->pi/3.*pow(V,3)/pow(dV,2);
+    tensors = pow(dV/V,2)/ppm->pi*128.*ppm->pi/3.*pow(V,3)/pow(dV,2);
 
     /** - store the obtained result for curvature and tensor perturbations */
     ppm->lnpk[ppt->index_md_scalars][index_k] = log(curvature);
@@ -1840,7 +1840,7 @@ int primordial_inflation_one_k(
              ppm->error_message,
              ppm->error_message);
 
-  dtau = ppr->primordial_inflation_pt_stepsize*2.*_PI_
+  dtau = ppr->primordial_inflation_pt_stepsize*2.*ppm->pi
     /MAX(sqrt(fabs(dy[ppm->index_in_dksi_re]/y[ppm->index_in_ksi_re])),k);
 
   /** - loop over time */
@@ -1877,7 +1877,7 @@ int primordial_inflation_one_k(
                ppm->error_message);
 
     /* new time step */
-    dtau = ppr->primordial_inflation_pt_stepsize*2.*_PI_
+    dtau = ppr->primordial_inflation_pt_stepsize*2.*ppm->pi
       /MAX(sqrt(fabs(dy[ppm->index_in_dksi_re]/y[ppm->index_in_ksi_re])),k);
 
     /* new aH */
@@ -1889,7 +1889,7 @@ int primordial_inflation_one_k(
     /* new curvature */
     z = y[ppm->index_in_a]*dy[ppm->index_in_phi]/aH;
     ksi2 = y[ppm->index_in_ksi_re]*y[ppm->index_in_ksi_re]+y[ppm->index_in_ksi_im]*y[ppm->index_in_ksi_im];
-    curvature_new = k*k*k/2./_PI_/_PI_*ksi2/z/z;
+    curvature_new = k*k*k/2./ppm->pi/ppm->pi*ksi2/z/z;
 
     /* variation of curvature with time (dimensionless) */
     dlnPdN = (curvature_new-curvature_old)/dtau*y[ppm->index_in_a]/dy[ppm->index_in_a]/curvature_new;
@@ -1907,7 +1907,7 @@ int primordial_inflation_one_k(
 
   /** - store final value of tensor perturbation for this wavenumber */
   ah2 = y[ppm->index_in_ah_re]*y[ppm->index_in_ah_re]+y[ppm->index_in_ah_im]*y[ppm->index_in_ah_im];
-  *tensor = 32.*k*k*k/_PI_*ah2/y[ppm->index_in_a]/y[ppm->index_in_a];
+  *tensor = 32.*k*k*k/ppm->pi*ah2/y[ppm->index_in_a]/y[ppm->index_in_a];
 
   //fprintf(stdout,"%g %g %g %g %g\n",k,*curvature,*tensor,*tensor/(*curvature),dlnPdN);
 
@@ -1965,7 +1965,7 @@ int primordial_inflation_find_attractor(
              ppm->error_message,
              ppm->error_message);
 
-  dphidt_0new = -dV_0/3./sqrt((8.*_PI_/3.)*V_0);
+  dphidt_0new = -dV_0/3./sqrt((8.*ppm->pi/3.)*V_0);
   phi = phi_0;
   counter = 0;
 
@@ -1992,7 +1992,7 @@ int primordial_inflation_find_attractor(
     /* take one step in phi, corresponding roughly to adding one more
        e-fold of inflation */
 
-    phi=phi+dV_0/V_0/16./_PI_;
+    phi=phi+dV_0/V_0/16./ppm->pi;
 
     /* fix the initial phi' to the slow-roll prediction in that point,
        and initialize other relevant quantities */
@@ -2002,7 +2002,7 @@ int primordial_inflation_find_attractor(
                ppm->error_message);
 
     a = 1.;
-    dphidt = -dV/3./sqrt((8.*_PI_/3.)*V);
+    dphidt = -dV/3./sqrt((8.*ppm->pi/3.)*V);
     y[ppm->index_in_a]=a;
     y[ppm->index_in_phi]=phi;
     y[ppm->index_in_dphi]=a*dphidt;
@@ -2033,7 +2033,7 @@ int primordial_inflation_find_attractor(
      solution */
 
   *dphidt_0 = dphidt_0new;
-  *H_0 = sqrt((8.*_PI_/3.)*(0.5*dphidt_0new*dphidt_0new+V_0));
+  *H_0 = sqrt((8.*ppm->pi/3.)*(0.5*dphidt_0new*dphidt_0new+V_0));
 
   if (ppm->primordial_verbose > 1) {
     printf(" (attractor found in phi=%g with phi'=%g, H=%g)\n",phi_0,*dphidt_0,*H_0);
@@ -2173,7 +2173,7 @@ int primordial_inflation_evolve_background(
     // in this case, the goal is to reach d2a/dt2 = 0 (end of accelerated expansion)
     stop = 0.;
     // current value of quantity = - d2a/dt2 /a = [- (a'/a)^2 + 3/2 8pi/3 phi'^2]/a^2
-    quantity = -pow(dy[ppm->index_in_a]/y[ppm->index_in_a],2) + 4*_PI_ *  y[ppm->index_in_dphi] * y[ppm->index_in_dphi];
+    quantity = -pow(dy[ppm->index_in_a]/y[ppm->index_in_a],2) + 4*ppm->pi *  y[ppm->index_in_dphi] * y[ppm->index_in_dphi];
     if (time == conformal) quantity /= pow(y[ppm->index_in_a],2);
 
     // check that we are in the right case
@@ -2293,7 +2293,7 @@ int primordial_inflation_evolve_background(
       break;
     case _end_inflation_:
       // current value of quantity = - d2a/dt2 /a = [- (a'/a)^2 + 3/2 8pi/3 phi'^2]/a^2
-      quantity = -pow(dy[ppm->index_in_a]/y[ppm->index_in_a],2) + 4*_PI_ *  y[ppm->index_in_dphi] * y[ppm->index_in_dphi];
+      quantity = -pow(dy[ppm->index_in_a]/y[ppm->index_in_a],2) + 4*ppm->pi *  y[ppm->index_in_dphi] * y[ppm->index_in_dphi];
       if (time == conformal) quantity /= pow(y[ppm->index_in_a],2);
       break;
     case _a_:
@@ -2340,11 +2340,11 @@ int primordial_inflation_evolve_background(
     // By taking the step dtau = - quantity / [d(quantity)/dtau] we nearly reach quantity=0 (end of inflation), up to very good approximation
     switch (time){
     case proper:
-      dtau = -quantity/(8.*_PI_*dy[ppm->index_in_phi]*(dy[ppm->index_in_a]*dy[ppm->index_in_phi]+y[ppm->index_in_a]*dy[ppm->index_in_dphi]));
+      dtau = -quantity/(8.*ppm->pi*dy[ppm->index_in_phi]*(dy[ppm->index_in_a]*dy[ppm->index_in_phi]+y[ppm->index_in_a]*dy[ppm->index_in_dphi]));
 
       break;
     case conformal:
-      dtau = -quantity/(8.*_PI_/y[ppm->index_in_a]/y[ppm->index_in_a]*dy[ppm->index_in_phi]*dy[ppm->index_in_dphi]);
+      dtau = -quantity/(8.*ppm->pi/y[ppm->index_in_a]/y[ppm->index_in_a]*dy[ppm->index_in_phi]*dy[ppm->index_in_dphi]);
       break;
     }
     break;
@@ -2503,7 +2503,7 @@ int primordial_inflation_get_epsilon(
                ppm->error_message,
                ppm->error_message);
 
-    *epsilon = 1./16./_PI_*pow(dV/V,2);
+    *epsilon = 1./16./ppm->pi*pow(dV/V,2);
     //*eta = 1./8./pi*(ddV/V)
     break;
 
@@ -2515,7 +2515,7 @@ int primordial_inflation_get_epsilon(
                ppm->error_message,
                ppm->error_message);
 
-    *epsilon = 1./4./_PI_*pow(dH/H,2);
+    *epsilon = 1./4./ppm->pi*pow(dH/H,2);
     break;
 
   default:
@@ -2644,14 +2644,14 @@ int primordial_inflation_find_phi_pivot(
 
       /* get the target value of ln_aH_ratio */
 
-      rho_end = 2./8./_PI_*pow(dy[ppm->index_in_a]/y[ppm->index_in_a],2);
-      rho_end = 8*_PI_/3.*rho_end/(_G_*_h_P_/pow(_c_,3))*pow(_Mpc_over_m_,2);
+      rho_end = 2./8./ppm->pi*pow(dy[ppm->index_in_a]/y[ppm->index_in_a],2);
+      rho_end = 8*ppm->pi/3.*rho_end/(_G_*_h_P_/pow(_c_,3))*pow(_Mpc_over_m_,2);
       h = 0.7;
       H0 = h * 1.e5 / _c_;
       rho_c0 = pow(H0,2);
 
-      sigma_B = 2. * pow(_PI_,5) * pow(_k_B_,4) / 15. / pow(_h_P_,3) / pow(_c_,2);
-      Omega_g0 = (4.*sigma_B/_c_*pow(2.726,4.)) / (3.*_c_*_c_*1.e10*h*h/_Mpc_over_m_/_Mpc_over_m_/8./_PI_/_G_);
+      sigma_B = 2. * pow(ppm->pi,5) * pow(_k_B_,4) / 15. / pow(_h_P_,3) / pow(_c_,2);
+      Omega_g0 = (4.*sigma_B/_c_*pow(2.726,4.)) / (3.*_c_*_c_*1.e10*h*h/_Mpc_over_m_/_Mpc_over_m_/8./ppm->pi/_G_);
       Omega_r0 = 3.044*7./8.*pow(4./11.,4./3.)*Omega_g0;
 
       target = log(H0/0.05*pow(Omega_r0,0.5)*pow(2./100.,1./12.)*pow(rho_end/rho_c0,0.25));
@@ -3103,7 +3103,7 @@ int primordial_inflation_derivs(
       case conformal:
 
         // a H = a'/a
-        ppipaw->aH = sqrt((8*_PI_/3.)*(0.5*y[ppm->index_in_dphi]*y[ppm->index_in_dphi]+ppipaw->a2*ppipaw->V));
+        ppipaw->aH = sqrt((8*ppm->pi/3.)*(0.5*y[ppm->index_in_dphi]*y[ppm->index_in_dphi]+ppipaw->a2*ppipaw->V));
         // 1: a
         dy[ppm->index_in_a]=y[ppm->index_in_a]*ppipaw->aH;
         // 2: phi
@@ -3115,7 +3115,7 @@ int primordial_inflation_derivs(
       case proper:
 
         // a H = adot
-        ppipaw->aH = y[ppm->index_in_a]*sqrt((8*_PI_/3.)*(0.5*y[ppm->index_in_dphi]*y[ppm->index_in_dphi]+ppipaw->V));
+        ppipaw->aH = y[ppm->index_in_a]*sqrt((8*ppm->pi/3.)*(0.5*y[ppm->index_in_dphi]*y[ppm->index_in_dphi]+ppipaw->V));
         // 1: a
         dy[ppm->index_in_a]=ppipaw->aH;
         // 2: phi
@@ -3129,12 +3129,12 @@ int primordial_inflation_derivs(
       ppipaw->zpp_over_z=
         2*ppipaw->aH*ppipaw->aH
         - ppipaw->a2*ppipaw->ddV
-        - 4.*_PI_*(7.*y[ppm->index_in_dphi]*y[ppm->index_in_dphi]
+        - 4.*ppm->pi*(7.*y[ppm->index_in_dphi]*y[ppm->index_in_dphi]
                    +4.*y[ppm->index_in_dphi]/ppipaw->aH*ppipaw->a2*ppipaw->dV)
-        +32.*_PI_*_PI_*pow(y[ppm->index_in_dphi],4)/pow(ppipaw->aH,2);
+        +32.*ppm->pi*ppm->pi*pow(y[ppm->index_in_dphi],4)/pow(ppipaw->aH,2);
 
       // a''/a (assumes that conformal time is requested)
-      ppipaw->app_over_a=2.*ppipaw->aH*ppipaw->aH - 4.*_PI_*y[ppm->index_in_dphi]*y[ppm->index_in_dphi];
+      ppipaw->app_over_a=2.*ppipaw->aH*ppipaw->aH - 4.*ppm->pi*y[ppm->index_in_dphi]*y[ppm->index_in_dphi];
 
       break;
 
@@ -3148,7 +3148,7 @@ int primordial_inflation_derivs(
       case conformal:
 
         // a H = a'/a
-        ppipaw->aH = sqrt((8*_PI_/3.)*ppipaw->a2*ppipaw->V);
+        ppipaw->aH = sqrt((8*ppm->pi/3.)*ppipaw->a2*ppipaw->V);
         // 1: a
         dy[ppm->index_in_a]=y[ppm->index_in_a]*ppipaw->aH;
         // 2: phi
@@ -3158,7 +3158,7 @@ int primordial_inflation_derivs(
       case proper:
 
         // a H = da/dt
-        ppipaw->aH = y[ppm->index_in_a]*sqrt((8*_PI_/3.)*ppipaw->V);
+        ppipaw->aH = y[ppm->index_in_a]*sqrt((8*ppm->pi/3.)*ppipaw->V);
         // 1: a
         dy[ppm->index_in_a]=ppipaw->aH;
         // 2: phi
@@ -3189,7 +3189,7 @@ int primordial_inflation_derivs(
       // 1: a
       dy[ppm->index_in_a]=ppipaw->a2*ppipaw->H;
       // 2: phi
-      dy[ppm->index_in_phi]=-1./4./_PI_*y[ppm->index_in_a]*ppipaw->dH;
+      dy[ppm->index_in_phi]=-1./4./ppm->pi*y[ppm->index_in_a]*ppipaw->dH;
       break;
 
     case proper:
@@ -3197,23 +3197,23 @@ int primordial_inflation_derivs(
       // 1: a
       dy[ppm->index_in_a]=y[ppm->index_in_a]*ppipaw->H;
       // 2: phi
-      dy[ppm->index_in_phi]=-1./4./_PI_*ppipaw->dH;
+      dy[ppm->index_in_phi]=-1./4./ppm->pi*ppipaw->dH;
       break;
     }
 
     // z''/z (assumes that conformal time is requested)
     ppipaw->zpp_over_z =
       2.               *ppipaw->a2*ppipaw->H*ppipaw->H
-      -3./4./_PI_      *ppipaw->a2*ppipaw->H*ppipaw->ddH
-      +1./16./_PI_/_PI_*ppipaw->a2*ppipaw->ddH*ppipaw->ddH
-      +1./16./_PI_/_PI_*ppipaw->a2*ppipaw->dH*ppipaw->dddH
-      -1./4./_PI_/_PI_ *ppipaw->a2*ppipaw->dH*ppipaw->dH*ppipaw->ddH/ppipaw->H
-      +1./2./_PI_      *ppipaw->a2*ppipaw->dH*ppipaw->dH
-      +1./8./_PI_/_PI_ *ppipaw->a2*ppipaw->dH*ppipaw->dH*ppipaw->dH*ppipaw->dH/ppipaw->H/ppipaw->H;
+      -3./4./ppm->pi      *ppipaw->a2*ppipaw->H*ppipaw->ddH
+      +1./16./ppm->pi/ppm->pi*ppipaw->a2*ppipaw->ddH*ppipaw->ddH
+      +1./16./ppm->pi/ppm->pi*ppipaw->a2*ppipaw->dH*ppipaw->dddH
+      -1./4./ppm->pi/ppm->pi *ppipaw->a2*ppipaw->dH*ppipaw->dH*ppipaw->ddH/ppipaw->H
+      +1./2./ppm->pi      *ppipaw->a2*ppipaw->dH*ppipaw->dH
+      +1./8./ppm->pi/ppm->pi *ppipaw->a2*ppipaw->dH*ppipaw->dH*ppipaw->dH*ppipaw->dH/ppipaw->H/ppipaw->H;
 
     // a''/a (assumes that conformal time is requested)
     ppipaw->app_over_a = 2.*ppipaw->a2*ppipaw->H*ppipaw->H
-      -4.*_PI_*dy[ppm->index_in_phi]*dy[ppm->index_in_phi];
+      -4.*ppm->pi*dy[ppm->index_in_phi]*dy[ppm->index_in_phi];
 
     break;
 

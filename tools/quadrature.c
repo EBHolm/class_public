@@ -746,6 +746,7 @@ int quadrature_gauss_legendre(
 			      double *w8,
 			      int n,
 			      double tol,
+            double pi,
 			      ErrorMsg error_message) {
 
   int m,j,i,counter;

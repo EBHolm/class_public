@@ -175,6 +175,8 @@ struct primordial {
   double H3;	/**< one parameter of the function H(phi) */
   double H4;	/**< one parameter of the function H(phi) */
 
+  double pi;
+  
   /* parameters describing inflation_V_end */
 
   double phi_end;	/**< value of inflaton at the end of inflation */

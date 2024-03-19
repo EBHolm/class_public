@@ -16,6 +16,7 @@ int hyperspherical_HIS_create(int K,
                               double sampling,
                               int l_WKB,
                               double phiminabs,
+                              double pi,
                               HyperInterpStruct *pHIS,
                               ErrorMsg error_message){
   /** Allocate storage for Hyperspherical Interpolation Structure (HIS).
@@ -30,10 +31,11 @@ int hyperspherical_HIS_create(int K,
   int j, k, l, nx, lmax, l_recurrence_max;
   int abort;
   int current_chunk, index_x;
+  pHIS->pi = pi;
 
   beta2 = beta*beta;
   lmax = lvec[nl-1];
-  lambda = 2*_PI_/beta;
+  lambda = 2*pi/beta;
   nx = (int) ((xmax-xmin)*sampling/lambda);
   nx = MAX(nx,2);
   deltax = (xmax-xmin)/(nx-1.0);
@@ -361,7 +363,7 @@ int hyperspherical_Hermite_interpolation_vector(HyperInterpStruct *pHIS,
     x = xinterp[j];
     //take advantage of periodicity of functions in closed case
     if (pHIS->K==1)
-      ClosedModY(pHIS->l[lnum], (int)(pHIS->beta+0.2), &x, &phisign, &dphisign);
+      ClosedModY(pHIS->l[lnum], (int)(pHIS->beta+0.2), &x, &phisign, &dphisign, pHIS->pi);
     //Loop over output values
     if ((x<xmin)||(x>xmax)){
       //Outside interpolation region, set to zero.
@@ -774,7 +776,8 @@ int CF1_from_Gegenbauer(int l,
                             double beta,
                             double * __restrict__ sinK_vec,
                             int size_sinK_vec,
-                            double * __restrict__ Phi){
+                            double * __restrict__ Phi,
+                            double pi){
   double e, w, w2, alpha, alpha2, t;
   double S, Q, C, argu, Ai;
   int airy_sign = 1, phisign = 1;
@@ -804,7 +807,7 @@ int CF1_from_Gegenbauer(int l,
     w2 = w*w;
     if (alpha > cscK){
       S = alpha*log((sqrt(w2-1.0)+sqrt(w2+alpha2))*one_over_sqrt_one_plus_alpha2)+
-        atan(one_over_alpha*sqrt((w2+alpha2)/(w2-1.0)))-M_PI_2;
+        atan(one_over_alpha*sqrt((w2+alpha2)/(w2-1.0)))-pi/2.;
       airy_sign = -1;
     }
     else{
@@ -816,14 +819,14 @@ int CF1_from_Gegenbauer(int l,
     Q = cscK*cscK-alpha2;
     C = 0.5*sqrt_alpha*one_over_beta;
     pow_argu_onesixth = pow(argu,1.0/6.0);
-    Ai = airy_cheb_approx(airy_sign*pow(pow_argu_onesixth,4));
-    Phi[index_sinK] = phisign*2.0*_SQRT_PI_*C*pow_argu_onesixth*pow(fabs(Q),-0.25)*Ai*cscK;
+    Ai = airy_cheb_approx(airy_sign*pow(pow_argu_onesixth,4), pi);
+    Phi[index_sinK] = phisign*2.0*sqrt(pi)*C*pow_argu_onesixth*pow(fabs(Q),-0.25)*Ai*cscK;
   }
   return _SUCCESS_;
 }
 
 
-int hyperspherical_WKB(int K,int l,double beta,double y, double *Phi){
+int hyperspherical_WKB(int K,int l,double beta,double y, double *Phi, double pi){
   double e, w, w2, alpha, alpha2, CscK, ytp, t;
   double S, Q, C, argu, Ai;
   int airy_sign = 1, phisign = 1, dphisign = 1, intbeta;
@@ -832,7 +835,7 @@ int hyperspherical_WKB(int K,int l,double beta,double y, double *Phi){
   if (K==1){
     //Limit range to [0; pi/2]:
     intbeta = (int)(beta+0.4); //Round to nearest integer (just to be sure)
-    ClosedModY(l, intbeta, &y, &phisign, &dphisign);
+    ClosedModY(l, intbeta, &y, &phisign, &dphisign, pi);
   }
   e = 1.0/sqrt(ldbl*(ldbl+1.0));
   alpha = beta*e;
@@ -853,7 +856,7 @@ int hyperspherical_WKB(int K,int l,double beta,double y, double *Phi){
   if (K==-1){
     if (y>ytp){
       S = alpha*log((sqrt(w2-1.0)+sqrt(w2+alpha2))/sqrt(1.0+alpha2))+
-        atan(1.0/alpha*sqrt((w2+alpha2)/(w2-1.0)))-0.5*_PI_;
+        atan(1.0/alpha*sqrt((w2+alpha2)/(w2-1.0)))-0.5*pi;
       airy_sign = -1;
     }
     else{
@@ -865,7 +868,7 @@ int hyperspherical_WKB(int K,int l,double beta,double y, double *Phi){
   else if (K==1){
     if (y>ytp){
       t = sqrt(1-w2/alpha2)/sqrt(w2-1.0);
-        S = atan(t)+alpha*atan(1.0/(t*alpha))-0.5*_PI_;
+        S = atan(t)+alpha*atan(1.0/(t*alpha))-0.5*pi;
         airy_sign = -1;
     }
     else{
@@ -877,17 +880,17 @@ int hyperspherical_WKB(int K,int l,double beta,double y, double *Phi){
   argu = 3.0*S/(2.0*e);
   Q = CscK*CscK-alpha2;
   C = 0.5*sqrt(alpha)/beta;
-  Ai = airy_cheb_approx(airy_sign*pow(argu,2.0/3.0));
-  *Phi = phisign*2.0*sqrt(_PI_)*C*pow(argu,1.0/6.0)*pow(fabs(Q),-0.25)*Ai*CscK;
+  Ai = airy_cheb_approx(airy_sign*pow(argu,2.0/3.0), pi);
+  *Phi = phisign*2.0*sqrt(pi)*C*pow(argu,1.0/6.0)*pow(fabs(Q),-0.25)*Ai*CscK;
   return _SUCCESS_;
 }
 
 
 
-double airy_cheb_approx(double z){
+double airy_cheb_approx(double z, double pi){
   double Ai;
   if (z<=-7){
-    Ai = coef1(z);
+    Ai = coef1(z, pi);
     return Ai;
   }
   if (z<=0){
@@ -902,14 +905,14 @@ double airy_cheb_approx(double z){
   return Ai;
 }
 
-double coef1(double z){
+double coef1(double z, double pi){
   const double A[5] = {1.1282427601,-0.6803534e-4,0.16687e-6,-0.128e-8,0.2e-10};
   const double B[5] = {0.7822108673e-1,-0.6895649e-4,0.32857e-6,-0.37e-8,0.7e-10};
   double x,y,t,Ai,zeta,theta,sintheta,costheta,FA,FB;
 
   x = -z;
   zeta = _TWO_OVER_THREE_*x*sqrt(x);
-  theta = zeta+0.25*_PI_;
+  theta = zeta+0.25*pi;
   sintheta = sin(theta);
   costheta = cos(theta);
 
@@ -1023,25 +1026,25 @@ double get_value_at_small_phi(int K,int l,double beta,double Phi){
   return xval;
 }
 
-int ClosedModY(int l, int beta, double *y, int * phisign, int * dphisign){
+int ClosedModY(int l, int beta, double *y, int * phisign, int * dphisign, double pi){
 
   *phisign = 1;
   *dphisign = 1;
 
 
-  while (*y > _TWOPI_)
-    *y -= _TWOPI_;
+  while (*y > 2*pi)
+    *y -= pi;
 
-  if ((*y) > _PI_){
-    *y = 2.0*_PI_-(*y);
+  if ((*y) > pi){
+    *y = 2.0*pi-(*y);
     //phisign *= pow(-1,l)
     if (l%2==1) //l is odd
       *phisign = -*phisign;
     else        //l is even
       *dphisign = -*dphisign;
   }
-  if ((*y)>0.5*_PI_){
-    *y = _PI_-(*y);
+  if ((*y)>0.5*pi){
+    *y = pi-(*y);
     //phisign *= pow(-1,beta-l-1)
     if ((beta-l)%2==0) //beta-l-1 odd
       *phisign = -*phisign;
@@ -1112,6 +1115,7 @@ int hyperspherical_get_xmin_from_Airy(int K,
                                       double xtol,
                                       double phiminabs,
                                       double *xmin,
+                                      double pi,
                                       int *fevals){
   double xold, xtp=0, xleft, xright, xnew;
   double Fnew, Fold, Fleft, Fright;
@@ -1137,10 +1141,10 @@ int hyperspherical_get_xmin_from_Airy(int K,
 
   xnew = 0.99*xtp;
 
-  Fnew = PhiWKB_minus_phiminabs(xnew,&wkbstruct);
+  Fnew = PhiWKB_minus_phiminabs(xnew,&wkbstruct, pi);
   *fevals = (*fevals)+1;
 
-  lambda = 2*_PI_/(beta+5.0);
+  lambda = 2*pi/(beta+5.0);
   if (Fnew>0)
     delx = -lambda;
   else
@@ -1153,7 +1157,7 @@ int hyperspherical_get_xmin_from_Airy(int K,
     xnew += delx;
     if (xnew<AIRY_SAFETY){
       xnew = AIRY_SAFETY;
-      Fnew = PhiWKB_minus_phiminabs(xnew,&wkbstruct);
+      Fnew = PhiWKB_minus_phiminabs(xnew,&wkbstruct, pi);
       *fevals = (*fevals)+1;
       if (Fnew>=0.0){
         *xmin = xnew;
@@ -1163,7 +1167,7 @@ int hyperspherical_get_xmin_from_Airy(int K,
         break;
       }
     }
-    Fnew = PhiWKB_minus_phiminabs(xnew,&wkbstruct);
+    Fnew = PhiWKB_minus_phiminabs(xnew,&wkbstruct, pi);
     *fevals = (*fevals)+1;
   } while (SIGN(Fnew)==(SIGN(Fold)));
 
@@ -1193,10 +1197,10 @@ int hyperspherical_get_xmin_from_Airy(int K,
   return _SUCCESS_;
 }
 
-double PhiWKB_minus_phiminabs(double x, void *param){
+double PhiWKB_minus_phiminabs(double x, void *param, double pi){
    double phiwkb;
    struct WKB_parameters *wkbparam = param;
-   hyperspherical_WKB(wkbparam->K,wkbparam->l,wkbparam->beta,x, &phiwkb);
+   hyperspherical_WKB(wkbparam->K,wkbparam->l,wkbparam->beta,x, &phiwkb, pi);
    return(fabs(phiwkb)-wkbparam->phiminabs);
 }
 

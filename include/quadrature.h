@@ -85,6 +85,7 @@ typedef struct adaptive_integration_tree_node{
 				    double *w8,
 				    int n,
 				    double tol,
+            double pi,
 				    ErrorMsg error_message);
 
       int quadrature_gauss_legendre_2D(

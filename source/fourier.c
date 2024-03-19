@@ -2194,7 +2194,7 @@ int fourier_pk_linear(
                  pfo->error_message,
                  pfo->error_message);
 
-      pk_ic[index_ic1_ic1] = 2.*_PI_*_PI_/exp(3.*pfo->ln_k[index_k])
+      pk_ic[index_ic1_ic1] = 2.*pba->pi*pba->pi/exp(3.*pfo->ln_k[index_k])
         *source_ic1*source_ic1
         *exp(primordial_pk[index_ic1_ic1]);
 
@@ -2420,15 +2420,15 @@ int fourier_sigmas(
   switch (sigma_output) {
 
   case out_sigma:
-    *result = sqrt(*result/(2.*_PI_*_PI_));
+    *result = sqrt(*result/(2.*pfo->pi*pfo->pi));
     break;
 
   case out_sigma_prime:
-    *result = *result/(2.*_PI_*_PI_);
+    *result = *result/(2.*pfo->pi*pfo->pi);
     break;
 
   case out_sigma_disp:
-    *result = sqrt(*result/(2.*_PI_*_PI_*3.));
+    *result = sqrt(*result/(2.*pfo->pi*pfo->pi*3.));
     break;
   }
 
@@ -2670,7 +2670,7 @@ int fourier_halofit(
     free(w_and_Omega);
   }
 
-  anorm    = 1./(2*pow(_PI_,2));
+  anorm    = 1./(2*pow(pba->pi,2));
 
   /*      Until the 17.02.2015 the values of k used for integrating sigma(R) quantities needed by Halofit where the same as in the perturbation module.
           Since then, we sample these integrals on more values, in order to get more precise integrals (thanks Matteo Zennaro for noticing the need for this).
@@ -3034,7 +3034,7 @@ int fourier_halofit_integrate(
 
   double k,pk,x2,integrand;
   int index_k;
-  double anorm = 1./(2*pow(_PI_,2));
+  double anorm = 1./(2*pow(pfo->pi,2));
 
   for (index_k=0; index_k < integrand_size; index_k++) {
     k = integrand_array[index_k*ia_size + index_ia_k];
@@ -3184,7 +3184,7 @@ int fourier_hmcode(
     Omega0_m = Omega0_m - pba->Omega0_ncdm_tot;
   }
 
-  anorm    = 1./(2*pow(_PI_,2));
+  anorm    = 1./(2*pow(pba->pi,2));
 
   /** Call all the relevant background parameters at this tau */
   class_alloc(pvecback,pba->bg_size*sizeof(double),pfo->error_message);
@@ -3200,7 +3200,7 @@ int fourier_hmcode(
   z_at_tau = 1./pvecback[pba->index_bg_a]-1.;
 
   /* The number below is the critical density today, rho_c = 3 * H0^2 / 8*pi*G, in units of M_sun over Mpc^3 */
-  rho_crit_today_in_msun_mpc3 = 3.*pow(1.e5*pba->h, 2)/8./_PI_/_G_*_Mpc_over_m_/_M_SUN_;
+  rho_crit_today_in_msun_mpc3 = 3.*pow(1.e5*pba->h, 2)/8./pba->pi/_G_*_Mpc_over_m_/_M_SUN_;
 
   free(pvecback);
 
@@ -3281,7 +3281,7 @@ int fourier_hmcode(
   for (index_mass=0;index_mass<ppr->nsteps_for_p1h_integral;index_mass++){
 
     m = exp(log(mmin)+log(mmax/mmin)*(index_mass)/(ppr->nsteps_for_p1h_integral-1));
-    r = pow((3.*m/(4.*_PI_*rho_crit_today_in_msun_mpc3*Omega0_m)), (1./3.));
+    r = pow((3.*m/(4.*pba->pi*rho_crit_today_in_msun_mpc3*Omega0_m)), (1./3.));
     mass[index_mass] = m;
     r_real[index_mass] = r;
     r_virial[index_mass] = r_real[index_mass]/pow(Delta_v, 1./3.);
