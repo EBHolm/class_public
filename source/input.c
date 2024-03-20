@@ -747,10 +747,10 @@ int input_shooting(struct file_content * pfc,
     }
 
     /** Copy the tuned fzw to pfc */
-    pfc->name = fzw.fc.name;
-    pfc->value = fzw.fc.value;
+    free(pfc->name); pfc->name = fzw.fc.name;
+    free(pfc->value); pfc->value = fzw.fc.value;
     pfc->size = fzw.fc.size;
-    pfc->read = fzw.fc.read;
+    free(pfc->read); pfc->read = fzw.fc.read;
     free(fzw.fc.filename);
 
     /** Free arrays allocated */
@@ -851,10 +851,10 @@ int input_shooting(struct file_content * pfc,
     }
   
     free(fzw.fc.filename);
-    pfc->name = fzw.fc.name;
-    pfc->value = fzw.fc.value;
+    free(pfc->name); pfc->name = fzw.fc.name;
+    free(pfc->value); pfc->value = fzw.fc.value;
     pfc->size = fzw.fc.size;
-    pfc->read = fzw.fc.read;
+    free(pfc->read); pfc->read = fzw.fc.read;
 
     /** Free arrays allocated */
     free(fzw.unknown_parameters_index);
