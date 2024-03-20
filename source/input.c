@@ -420,7 +420,14 @@ int input_read_from_file(struct file_content * pfc,
                             errmsg),
              errmsg,
              errmsg);
-
+  
+  if (has_shooting == _TRUE_) {
+    class_call(input_read_precisions(pfc,ppr,pba,pth,ppt,ptr,ppm,phr,pfo,ple,psd,pop,
+                                     errmsg),
+               errmsg,
+               errmsg);
+  }
+  
   /** Update structs with input that is potentially updated after shooting */
     class_call(input_read_parameters(pfc,ppr,pba,pth,ppt,ptr,ppm,phr,pfo,ple,psd,pop,
                                      errmsg),
