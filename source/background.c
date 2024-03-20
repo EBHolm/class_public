@@ -1404,14 +1404,14 @@ int background_indices(
     if (pba->trigger_fluid_approximation == _TRUE_) {
       // Only rho is evolved within the fluid approximation
       class_define_index(pba->index_bi_rho_trigger, _TRUE_, index_bi, 1);
-      pba->index_bi_phi_trigger = NAN;
-      pba->index_bi_phi_prime_trigger = NAN;
+      pba->index_bi_phi_trigger = -1;
+      pba->index_bi_phi_prime_trigger = -1;
     }
     else {
       // Not fluid approximation, evolve the field itself
       class_define_index(pba->index_bi_phi_trigger, _TRUE_, index_bi, 1);
       class_define_index(pba->index_bi_phi_prime_trigger, _TRUE_, index_bi, 1);
-      pba->index_bi_rho_trigger = NAN;
+      pba->index_bi_rho_trigger = -1;
     }
   }
 
@@ -2281,7 +2281,7 @@ int background_solve(
 
       pba->trigger_fluid_approximation = _TRUE_;
       if (pba->background_verbose > 1) {
-        printf("Turned on NEDE trigger fluid approximation at a=%g with rho_trigger=%g, matching the FA initial value rho_trigger=%g.\n", pvecback_integration[pba->index_bg_a], pvecback_integration[pba->index_bg_rho_trigger], rho_tfa);
+        printf("Turned on NEDE trigger fluid approximation at a=%g with rho_trigger=%g, matching the FA initial value rho_trigger=%g.\n", pvecback[pba->index_bg_a], pvecback[pba->index_bg_rho_trigger], rho_tfa);
       }
       
       /** - assign new indices after approximation turned on */
