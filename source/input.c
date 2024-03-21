@@ -421,7 +421,16 @@ int input_read_from_file(struct file_content * pfc,
              errmsg,
              errmsg);
   
+  if (has_shooting == _TRUE_ && pba->shooting_failed == _TRUE_) {
+    return _SUCCESS_;
+  }
   if (has_shooting == _TRUE_) {
+    if (pba->shooting_failed == _TRUE_) {
+      // Shooting failed, but error must be thrown in background in order to trigger a
+      // runtime error, so here we skip the rest and go straight to background
+      return _SUCCESS_;
+    }
+    
     class_call(input_read_precisions(pfc,ppr,pba,pth,ppt,ptr,ppm,phr,pfo,ple,psd,pop,
                                      errmsg),
                errmsg,
@@ -429,10 +438,10 @@ int input_read_from_file(struct file_content * pfc,
   }
   
   /** Update structs with input that is potentially updated after shooting */
-    class_call(input_read_parameters(pfc,ppr,pba,pth,ppt,ptr,ppm,phr,pfo,ple,psd,pop,
-                                     errmsg),
-               errmsg,
-               errmsg);
+  class_call(input_read_parameters(pfc,ppr,pba,pth,ppt,ptr,ppm,phr,pfo,ple,psd,pop,
+                                   errmsg),
+             errmsg,
+             errmsg);
 
   /** Write info on the read/unread parameters. This is the correct place to do it,
       since we want it to happen after all the shooting business,
@@ -740,11 +749,6 @@ int input_shooting(struct file_content * pfc,
 
     /** Set status of shooting */
     pba->shooting_failed = shooting_failed;
-    if (pba->shooting_failed == _TRUE_) {
-      background_free_input(pba);
-      thermodynamics_free_input(pth);
-      perturbations_free_input(ppt);
-    }
 
     /** Copy the tuned fzw to pfc */
     free(pfc->name); pfc->name = fzw.fc.name;
