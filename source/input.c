@@ -422,19 +422,9 @@ int input_read_from_file(struct file_content * pfc,
              errmsg);
   
   if (has_shooting == _TRUE_ && pba->shooting_failed == _TRUE_) {
+    // Shooting failed, but error must be thrown in background in order to trigger a
+    // runtime error, so here we skip the rest and go straight to background
     return _SUCCESS_;
-  }
-  if (has_shooting == _TRUE_) {
-    if (pba->shooting_failed == _TRUE_) {
-      // Shooting failed, but error must be thrown in background in order to trigger a
-      // runtime error, so here we skip the rest and go straight to background
-      return _SUCCESS_;
-    }
-    
-    class_call(input_read_precisions(pfc,ppr,pba,pth,ppt,ptr,ppm,phr,pfo,ple,psd,pop,
-                                     errmsg),
-               errmsg,
-               errmsg);
   }
   
   /** Update structs with input that is potentially updated after shooting */
@@ -750,11 +740,19 @@ int input_shooting(struct file_content * pfc,
     /** Set status of shooting */
     pba->shooting_failed = shooting_failed;
 
+    /* all parameters read in fzw must be considered as read in pfc. At the same
+       time the parameters read before in pfc (like theta_s,...) must still be
+       considered as read (hence we could not do a memcopy) */
+    for (i=0; i < pfc->size; i ++) {
+      if (fzw.fc.read[i] == _TRUE_)
+        pfc->read[i] = _TRUE_;
+    }
+    free(fzw.fc.read);
+    
     /** Copy the tuned fzw to pfc */
     free(pfc->name); pfc->name = fzw.fc.name;
     free(pfc->value); pfc->value = fzw.fc.value;
     pfc->size = fzw.fc.size;
-    free(pfc->read); pfc->read = fzw.fc.read;
     free(fzw.fc.filename);
 
     /** Free arrays allocated */
@@ -854,11 +852,19 @@ int input_shooting(struct file_content * pfc,
               fzw.fc.value[pfc->size]);
     }
   
+    /* all parameters read in fzw must be considered as read in pfc. At the same
+       time the parameters read before in pfc (like theta_s,...) must still be
+       considered as read (hence we could not do a memcopy) */
+    for (i=0; i < pfc->size; i ++) {
+      if (fzw.fc.read[i] == _TRUE_)
+        pfc->read[i] = _TRUE_;
+    }
+    free(fzw.fc.read);
+    
     free(fzw.fc.filename);
     free(pfc->name); pfc->name = fzw.fc.name;
     free(pfc->value); pfc->value = fzw.fc.value;
     pfc->size = fzw.fc.size;
-    free(pfc->read); pfc->read = fzw.fc.read;
 
     /** Free arrays allocated */
     free(fzw.unknown_parameters_index);
