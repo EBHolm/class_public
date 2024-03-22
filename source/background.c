@@ -3154,9 +3154,9 @@ int background_sources(
   
   if (pba->has_NEDE_trigger) {
     double H = bg_table_row[pba->index_bg_H];
-    if (H < pba->trigger_fluid_H_over_m*pba->NEDE_trigger_mass) {
+    if (H < pba->trigger_fluid_H_over_m*pba->NEDE_trigger_mass && a > 1./(pba->z_decay_NEDE + 1)) {
       if (pba->a_trigger_fluid == 100.) {
-        // Turn on NEDE trigger fluid approximation
+        // Turn on NEDE trigger fluid approximation (only if NEDE has already decayed)
         // printf("From BG Sources: Turned on FA at a=%g\n", a);
         pba->a_trigger_fluid = a;
         pba->H_fluid = H;

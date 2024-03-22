@@ -4118,13 +4118,13 @@ int perturbations_vector_init(
     /* Here we allocate memory for the variables to be integrated depending on NEDE phase */
     if (pba->has_NEDE_pert == _TRUE_) {
       if (pba->has_NEDE_trigger == _TRUE_) {
-        if ((ppw->approx[ppw->index_ap_CCa] == (int)CCa_on) || ((pba->has_NEDE_trigger_DM == _TRUE_) && (ppw->approx[ppw->index_ap_tfa] == (int)tfa_off))) {
+        if (pba->has_NEDE_trigger_DM == _TRUE_ && ppw->approx[ppw->index_ap_tfa] == (int)tfa_off) {
           /* trigger field density */
           class_define_index(ppv->index_pt_phi_trigger, pba->has_NEDE_trigger, index_pt, 1);
           /* trigger field velocity */
           class_define_index(ppv->index_pt_phi_prime_trigger, pba->has_NEDE_trigger, index_pt, 1);
         }
-        else if ((pba->has_NEDE_trigger_DM == _TRUE_) && (ppw->approx[ppw->index_ap_tfa] == (int)tfa_on)) {
+        else if (pba->has_NEDE_trigger_DM == _TRUE_ && ppw->approx[ppw->index_ap_tfa] == (int)tfa_on) {
           class_define_index(ppv->index_pt_delta_trigger_fld, pba->has_NEDE_trigger_DM, index_pt, 1);
           class_define_index(ppv->index_pt_theta_trigger_fld, pba->has_NEDE_trigger_DM, index_pt, 1);
         }
