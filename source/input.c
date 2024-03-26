@@ -421,17 +421,17 @@ int input_read_from_file(struct file_content * pfc,
              errmsg,
              errmsg);
   
-  if (has_shooting == _TRUE_ && pba->shooting_failed == _TRUE_) {
-    // Shooting failed, but error must be thrown in background in order to trigger a
-    // runtime error, so here we skip the rest and go straight to background
-    return _SUCCESS_;
-  }
-  
   /** Update structs with input that is potentially updated after shooting */
   class_call(input_read_parameters(pfc,ppr,pba,pth,ppt,ptr,ppm,phr,pfo,ple,psd,pop,
                                    errmsg),
              errmsg,
              errmsg);
+
+  if (has_shooting == _TRUE_ && pba->shooting_failed == _TRUE_) {
+    // Shooting failed, but error must be thrown in background in order to trigger a
+    // runtime error, so here we skip the rest and go straight to background  
+    return _SUCCESS_;
+  }
 
   /** Write info on the read/unread parameters. This is the correct place to do it,
       since we want it to happen after all the shooting business,
