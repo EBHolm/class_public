@@ -2625,7 +2625,6 @@ int background_initial_conditions(
    */
   if (pba->has_NEDE_trigger == _TRUE_ && pba->has_NEDE == _TRUE_) {
     /* phi'_ini = -1/5 * phi_ini a^2 m^2  / (a H) where H = sqrt(rho) ins class conventions. */
-    pba->trigger_fluid_approximation = _FALSE_;
     pvecback_integration[pba->index_bi_phi_trigger] = pba->NEDE_trigger_ini;
     pvecback_integration[pba->index_bi_phi_prime_trigger] = -1./5.*pba->NEDE_trigger_ini*pow(pba->NEDE_trigger_mass, 2)/pow(rho_rad, 0.5)*a;
   }
