@@ -2460,6 +2460,16 @@ cdef class Class:
                     value = self.ba.a_trigger_fluid
                 else:
                     raise CosmoSevereError("You have asked for 'a_trigger_fluid', but did not run with NEDE.")
+            elif name == 'NEDE_trigger_ini':
+                if (self.ba.has_NEDE == _TRUE_):
+                    value = self.ba.NEDE_trigger_ini
+                else:
+                    raise CosmoSevereError("You have asked for 'NEDE_trigger_ini', but did not run with NEDE.")
+            elif name == 'NEDE_trigger_mass':
+                if (self.ba.has_NEDE == _TRUE_):
+                    value = self.ba.NEDE_trigger_mass
+                else:
+                    raise CosmoSevereError("You have asked for 'NEDE_trigger_mass', but did not run with NEDE.")
             elif name == 'g_sd':
                 self.compute(["distortions"])
                 if (self.sd.has_distortions == _FALSE_):
