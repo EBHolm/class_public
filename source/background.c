@@ -1400,7 +1400,7 @@ int background_indices(
   
   /* -> NEDE trigger field, its derivative and energy density
         Important that these are the last defined B bi indices! */
-  if (pba->has_NEDE_trigger) {
+  if (pba->has_NEDE_trigger == _TRUE_) {
     if (pba->trigger_fluid_approximation == _TRUE_) {
       // Only rho is evolved within the fluid approximation
       class_define_index(pba->index_bi_rho_trigger, _TRUE_, index_bi, 1);
@@ -2161,9 +2161,6 @@ int background_solve(
   int n_ncdm;
   
   /** - assign values to all indices in vectors of background quantities */
-  if (pba->has_NEDE_trigger) {
-    pba->trigger_fluid_approximation = _FALSE_;
-  }
   class_call(background_indices(pba),
              pba->error_message,
              pba->error_message);
@@ -2255,7 +2252,7 @@ int background_solve(
              pba->error_message);
   
   double* new_pvecback_integration;
-  if (pba->has_NEDE_trigger) {
+  if (pba->has_NEDE_trigger == _TRUE_) {
     if (pba->a_trigger_fluid != 100.) {
       // Fluid approximation was requested; integration was stopped early, continue integration with new variables
       
@@ -2264,6 +2261,7 @@ int background_solve(
       double* pvecback;
       class_alloc(pvecback,pba->bg_size*sizeof(double),pba->error_message);
       double a = pba->a_trigger_fluid_safe;
+      //printf("\n\nAT FLUID APPROXIMATION TRIGGER: a_trigger_fluid_safe=%g\n", a);
       class_call(background_functions(pba, a, pvecback_integration, normal_info, pvecback),
                  pba->error_message,
                  pba->error_message);
@@ -2627,6 +2625,7 @@ int background_initial_conditions(
    */
   if (pba->has_NEDE_trigger == _TRUE_ && pba->has_NEDE == _TRUE_) {
     /* phi'_ini = -1/5 * phi_ini a^2 m^2  / (a H) where H = sqrt(rho) ins class conventions. */
+    pba->trigger_fluid_approximation = _FALSE_;
     pvecback_integration[pba->index_bi_phi_trigger] = pba->NEDE_trigger_ini;
     pvecback_integration[pba->index_bi_phi_prime_trigger] = -1./5.*pba->NEDE_trigger_ini*pow(pba->NEDE_trigger_mass, 2)/pow(rho_rad, 0.5)*a;
   }
@@ -3152,18 +3151,20 @@ int background_sources(
              pba->error_message,
              pba->error_message);
   
-  if (pba->has_NEDE_trigger) {
+  if (pba->has_NEDE_trigger == _TRUE_) {
     double H = bg_table_row[pba->index_bg_H];
     if (H < pba->trigger_fluid_H_over_m*pba->NEDE_trigger_mass && a > 1./(pba->z_decay_NEDE + 1)) {
       if (pba->a_trigger_fluid == 100.) {
         // Turn on NEDE trigger fluid approximation (only if NEDE has already decayed)
-        // printf("From BG Sources: Turned on FA at a=%g\n", a);
+        //printf("From BG Sources: Turned on FA at a=%g\n", a);
+        //printf("At this time, pba->trigger_fluid_approximation=%d\n", pba->trigger_fluid_approximation);
         pba->a_trigger_fluid = a;
         pba->H_fluid = H;
         pba->H_prime_fluid = bg_table_row[pba->index_bg_H_prime];
       }
       else if (pba->trigger_fluid_approximation == _FALSE_) {
         if (H*pba->trigger_fluid_safety_factor < pba->trigger_fluid_H_over_m*pba->NEDE_trigger_mass) { // 1.05 is a safety factor, same as in old TriggerCLASS
+          //printf("From BG Sources: Set a_trigger_fluid_safe at a=%g\n", a);
           pba->a_trigger_fluid_safe = a;
           return _APPROXIMATION_REACHED_;
         }
@@ -3304,11 +3305,11 @@ int background_output_budget(
       class_print_species("Spatial Curvature",k);
       budget_other+=pba->Omega0_k;
     }
-    if (pba->has_NEDE) {
+    if (pba->has_NEDE == _TRUE_) {
       class_print_species("New EDE", NEDE);
       budget_other += pba->Omega0_NEDE;
     }
-    if (pba->has_NEDE_trigger) {
+    if (pba->has_NEDE_trigger == _TRUE_) {
       class_print_species("New EDE trigger", trigger);
       budget_other += pba->Omega0_trigger;
     }

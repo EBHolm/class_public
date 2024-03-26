@@ -2936,7 +2936,7 @@ int perturbations_workspace_init(
       /*CCa_off: NEDE is decribed as a fluid with fluctuations.*/
       ppw->approx[ppw->index_ap_CCa] = (int)CCa_on;
 
-      if (pba->has_NEDE_trigger) {
+      if (pba->has_NEDE_trigger == _TRUE_) {
         ppw->approx[ppw->index_ap_tfa] = (int)tfa_off;
       }
     }
@@ -3896,7 +3896,7 @@ int perturbations_find_approximation_switches(
                 (interval_approx[index_switch][ppw->index_ap_CCa] == (int)CCa_off)) {
               fprintf(stdout, "Mode k=%e: will create decaying NEDE mode at tau=%e\n", k, interval_limit[index_switch]);
             }
-            if (pba->has_NEDE_trigger_DM) {
+            if (pba->has_NEDE_trigger_DM == _TRUE_) {
               if ((interval_approx[index_switch - 1][ppw->index_ap_tfa] == (int)tfa_off) &&
                   (interval_approx[index_switch][ppw->index_ap_tfa] == (int)tfa_on)) {
                 fprintf(stdout, "Mode k=%e: will switch on trigger fluid approximation at tau=%e\n", k, interval_limit[index_switch]);
@@ -7246,7 +7246,7 @@ int perturbations_approximations(
       }
 
       /*New EDE: Here we define the switch for the trigger fluid approximation*/ // stop3
-      if (pba->has_NEDE_trigger)
+      if (pba->has_NEDE_trigger == _TRUE_)
       {
         if ((ppw->pvecback[pba->index_bg_a] <= pba->a_trigger_fluid) || (pba->has_NEDE_trigger_DM == _FALSE_))
         {
@@ -9661,7 +9661,7 @@ int perturbations_print_variables(double tau,
          if (pba->has_NEDE_pert) {
            delta_NEDE -= 4. * pvecback[pba->index_bg_H]*pvecback[pba->index_bg_a]*alpha;
            theta_NEDE += k*k*alpha;
-           if (pba->has_NEDE_trigger){
+           if (pba->has_NEDE_trigger == _TRUE_){
            delta_trigger += alpha*(-3.0*H*(1.0+pvecback[pba->index_bg_p_trigger]/pvecback[pba->index_bg_rho_trigger]));
                  theta_trigger += k*k*alpha;
            }
