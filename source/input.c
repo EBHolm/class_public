@@ -420,13 +420,17 @@ int input_read_from_file(struct file_content * pfc,
                             errmsg),
              errmsg,
              errmsg);
+  
+  /** Update structs with input that is potentially updated after shooting */
+  class_call(input_read_parameters(pfc,ppr,pba,pth,ppt,ptr,ppm,phr,pfo,ple,psd,pop,
+                                   errmsg),
+             errmsg,
+             errmsg);
 
-  /** If no shooting is necessary, initialize read parameters without it */
-  if (has_shooting == _FALSE_){
-    class_call(input_read_parameters(pfc,ppr,pba,pth,ppt,ptr,ppm,phr,pfo,ple,psd,pop,
-                                     errmsg),
-               errmsg,
-               errmsg);
+  if (has_shooting == _TRUE_ && pba->shooting_failed == _TRUE_) {
+    // Shooting failed, but error must be thrown in background in order to trigger a
+    // runtime error, so here we skip the rest and go straight to background  
+    return _SUCCESS_;
   }
 
   /** Write info on the read/unread parameters. This is the correct place to do it,
@@ -527,7 +531,10 @@ int input_shooting(struct file_content * pfc,
                                        "omega_dcdmdr",
                                        "Omega_scf",
                                        "Omega_ini_dcdm",
-                                       "omega_ini_dcdm"};
+                                       "omega_ini_dcdm",
+                                       "z_decay_NEDE",
+                                       "Omega0_NEDE_trigger_DM",
+                                       "NEDE_trigger_ini"};
 
   /* array of corresponding parameters that must be adjusted in order to meet the target (= unknown parameters) */
   char * const unknown_namestrings[] = {"h",                        /* unknown param for target '100*theta_s' */
@@ -536,7 +543,10 @@ int input_shooting(struct file_content * pfc,
                                         "omega_ini_dcdm",           /* unknown param for target 'omega_dcdmdr' */
                                         "scf_shooting_parameter",   /* unknown param for target 'Omega_scf' */
                                         "Omega_dcdmdr",             /* unknown param for target 'Omega_ini_dcdm' */
-                                        "omega_dcdmdr"};             /* unknown param for target 'omega_ini_dcdm' */
+                                        "omega_dcdmdr",             /* unknown param for target 'omega_ini_dcdm' */
+                                        "NEDE_trigger_mass",        /* unknown param for target 'z_decay_NEDE' */
+                                        "NEDE_trigger_ini",         /* unknown param for target 'Omega0_NEDE_trigger_DM' */
+                                        "Omega0_NEDE_trigger_DM"};  /* unknown param for target 'NEDE_trigger_ini' */
 
   /* for each target, module up to which we need to run CLASS in order
      to compute the targetted quantities (not running the whole code
@@ -547,7 +557,10 @@ int input_shooting(struct file_content * pfc,
                                         cs_background,     /* computation stage for target 'omega_dcdmdr' */
                                         cs_background,     /* computation stage for target 'Omega_scf' */
                                         cs_background,     /* computation stage for target 'Omega_ini_dcdm' */
-                                        cs_background};     /* computation stage for target 'omega_ini_dcdm' */
+                                        cs_background,     /* computation stage for target 'omega_ini_dcdm' */
+                                        cs_background,     /* computation stage for target 'z_decay_NEDE' */
+                                        cs_background,    /* computation stage for target 'Omega0_NEDE_trigger_DM' */
+                                        cs_background};    /* computation stage for target 'NEDE_trigger_ini' */
 
   struct fzerofun_workspace fzw;
 
@@ -557,6 +570,7 @@ int input_shooting(struct file_content * pfc,
   unknown_parameters_size = 0;
   fzw.required_computation_stage = 0;
   for (index_target = 0; index_target < _NUM_TARGETS_; index_target++){
+    
     class_call(parser_read_double(pfc,target_namestrings[index_target],&param1,&flag1,errmsg),
                errmsg,
                errmsg);
@@ -586,17 +600,11 @@ int input_shooting(struct file_content * pfc,
     /* We need to remember that we shot so we can clean up properly */
     *has_shooting=_TRUE_;
 
-    /* Create file content structure with additional entries */
-    class_call(parser_init(&(fzw.fc),
-                           pfc->size+unknown_parameters_size,
-                           pfc->filename,
-                           errmsg),
+    class_call(parser_extend(pfc, unknown_parameters_size, errmsg),
                errmsg,errmsg);
 
-    /* Copy input file content to the new file content structure: */
-    memcpy(fzw.fc.name, pfc->name, pfc->size*sizeof(FileArg));
-    memcpy(fzw.fc.value, pfc->value, pfc->size*sizeof(FileArg));
-    memcpy(fzw.fc.read, pfc->read, pfc->size*sizeof(short));
+    class_call(parser_init_from_pfc(pfc, &(fzw.fc), errmsg),
+               errmsg,errmsg);
 
     class_alloc(unknown_parameter,
                 unknown_parameters_size*sizeof(double),
@@ -628,7 +636,7 @@ int input_shooting(struct file_content * pfc,
       fzw.target_name[counter] = index_target;
       /* store target value of target parameter */
       fzw.target_value[counter] = param1;
-      fzw.unknown_parameters_index[counter]=pfc->size+counter;
+      fzw.unknown_parameters_index[counter]=pfc->size+counter-unknown_parameters_size;
       /* substitute the name of the target parameter with the name of the
          corresponding unknown parameter */
       strcpy(fzw.fc.name[fzw.unknown_parameters_index[counter]],unknown_namestrings[index_target]);
@@ -723,32 +731,14 @@ int input_shooting(struct file_content * pfc,
       fprintf(stdout,"Shooting completed using %d function evaluations\n",fevals);
     }
 
-    /** Read all parameters from the fc obtained through shooting */
-    class_call(input_read_parameters(&(fzw.fc),ppr,pba,pth,ppt,ptr,ppm,phr,pfo,ple,psd,pop,
-                                     errmsg),
-               errmsg,
-               errmsg);
-
     /** Set status of shooting */
     pba->shooting_failed = shooting_failed;
-    if (pba->shooting_failed == _TRUE_) {
-      background_free_input(pba);
-      thermodynamics_free_input(pth);
-      perturbations_free_input(ppt);
-    }
 
-    /* all parameters read in fzw must be considered as read in pfc. At the same
-       time the parameters read before in pfc (like theta_s,...) must still be
-       considered as read (hence we could not do a memcopy) */
-    for (i=0; i < pfc->size; i ++) {
-      if (fzw.fc.read[i] == _TRUE_)
-        pfc->read[i] = _TRUE_;
-    }
-
-    /* Free tuned pfc */
-    parser_free(&(fzw.fc));
+    parser_copy(&(fzw.fc), pfc, pfc->size - unknown_parameters_size, pfc->size);
 
     /** Free arrays allocated */
+    class_call(parser_free(&(fzw.fc)),
+               errmsg, errmsg);
     free(unknown_parameter);
     free(fzw.unknown_parameters_index);
     free(fzw.target_name);
@@ -769,17 +759,12 @@ int input_shooting(struct file_content * pfc,
   if (flag1 == _TRUE_ || flag2 == _TRUE_) {
     /* Tell the main function that shooting indeed has occured */
     *has_shooting=_TRUE_;
-    /* Create file content structure with additional entries */
-    class_call(parser_init(&(fzw.fc),
-                           pfc->size+1,
-                           pfc->filename,
-                           errmsg),
-               errmsg,errmsg);
 
-    /* Copy input file content to the new file content structure: */
-    memcpy(fzw.fc.name, pfc->name, pfc->size*sizeof(FileArg));
-    memcpy(fzw.fc.value, pfc->value, pfc->size*sizeof(FileArg));
-    memcpy(fzw.fc.read, pfc->read, pfc->size*sizeof(short));
+    class_call(parser_extend(pfc, 1, errmsg),
+               errmsg,errmsg);
+    
+    class_call(parser_init_from_pfc(pfc, &(fzw.fc), errmsg),
+               errmsg,errmsg);
 
     fzw.target_size = 1;
     class_alloc(fzw.unknown_parameters_index,
@@ -802,11 +787,11 @@ int input_shooting(struct file_content * pfc,
       fzw.target_value[0] = param2;
     }
     /* store target value of target parameter */
-    fzw.unknown_parameters_index[0]=pfc->size;
+    fzw.unknown_parameters_index[0]=pfc->size - 1;
     fzw.required_computation_stage = cs_nonlinear;
     /* substitute the name of the target parameter with the name of the
        corresponding unknown parameter */
-    strcpy(fzw.fc.name[pfc->size],"A_s");
+    strcpy(fzw.fc.name[pfc->size - 1],"A_s");
 
     /* Print to the user */
     if (input_verbose > 0) {
@@ -838,30 +823,18 @@ int input_shooting(struct file_content * pfc,
     A_s = (fzw.target_value[0]/sigma8_or_S8) *(fzw.target_value[0]/sigma8_or_S8) * A_s; //(truesigma/sigma_for_guess)^2 *A_s_for_guess
 
     /* Store the derived value with high enough accuracy */
-    sprintf(fzw.fc.value[pfc->size],"%.20e",A_s);
+    sprintf(fzw.fc.value[pfc->size - 1],"%.20e",A_s);
     if (input_verbose > 0) {
       fprintf(stdout," -> found '%s = %s'\n",
-              fzw.fc.name[pfc->size],
-              fzw.fc.value[pfc->size]);
+              fzw.fc.name[pfc->size - 1],
+              fzw.fc.value[pfc->size - 1]);
     }
+  
+    parser_copy(&(fzw.fc), pfc, pfc->size - 1, pfc->size);
 
-    /* Now read the remaining parameters from the fine tuned fzw into the individual structures */
-    class_call(input_read_parameters(&(fzw.fc),ppr,pba,pth,ppt,ptr,ppm,phr,pfo,ple,psd,pop,
-                                     errmsg),
-               errmsg,
-               errmsg);
-
-    /* all parameters read in fzw must be considered as read in pfc. At the same
-       time the parameters read before in pfc (like theta_s,...) must still be
-       considered as read (hence we could not do a memcopy) */
-    for (i=0; i < pfc->size; i ++) {
-      if (fzw.fc.read[i] == _TRUE_)
-        pfc->read[i] = _TRUE_;
-    }
-
-    /* Free tuned pfc */
-    parser_free(&(fzw.fc));
-
+    /** Free arrays allocated */
+    class_call(parser_free(&(fzw.fc)),
+               errmsg, errmsg);
     /** Free arrays allocated */
     free(fzw.unknown_parameters_index);
     free(fzw.target_name);
@@ -1282,6 +1255,37 @@ int input_get_guess(double *xguess,
       xguess[index_guess] = 2.43e-9/0.891*pfzw->target_value[index_guess];
       dxdy[index_guess] = 2.43e-9/0.891;
       break;
+      case z_decay_NEDE: {
+        // Need to guess NEDE_trigger_mass
+        double Omega_M = ba.Omega0_cdm + ba.Omega0_b + ba.Omega0_ncdm_tot;
+        double z_NEDE = pfzw->target_value[index_guess];
+        double trigger_mass = 0.5 * ba.H0 / ba.Bubble_trigger_H_over_m * pow(1. / (1. - ba.f_NEDE), 0.5) * pow(Omega_M * pow((1. + z_NEDE), 3) + Omega_M * pow((1. + z_NEDE), 4) / (3001.) + (1. - Omega_M), 0.5);
+        
+        xguess[index_guess] = trigger_mass;
+        dxdy[index_guess] = 0.5 * trigger_mass * (3. * Omega_M * pow((1. + z_NEDE), 2) + 4. * Omega_M * pow((1. + z_NEDE), 3) / (3001.)) / (Omega_M * pow((1. + z_NEDE), 3) + Omega_M * pow((1. + z_NEDE), 4) / (3001.) + (1. - Omega_M));
+        break;
+      }
+      case Omega0_NEDE_trigger_DM: {
+        // Need to guess NEDE_trigger_ini
+        double Omega_M = ba.Omega0_cdm + ba.Omega0_b + ba.Omega0_ncdm_tot;
+        double z_NEDE = ba.z_decay_NEDE;
+        double trigger_mass = 0.5 * ba.H0 / ba.Bubble_trigger_H_over_m * pow(1. / (1. - ba.f_NEDE), 0.5) * pow(Omega_M * pow((1. + z_NEDE), 3) + Omega_M * pow((1. + z_NEDE), 4) / (3001.) + (1. - Omega_M), 0.5);
+        
+        xguess[index_guess] = 0.5*pow(75. * ba.H0 * ba.H0 * pfzw->target_value[index_guess] * pow(z_NEDE, 3) / pow(trigger_mass, 2), 0.5);
+        dxdy[index_guess] = 0.5 * xguess[index_guess] / pfzw->target_value[index_guess];
+        break;
+      }
+      case NEDE_trigger_ini: {
+        // Need to guess Omega0_NEDE_trigger_DM
+        // Inversion of the guess above
+        double Omega_M = ba.Omega0_cdm + ba.Omega0_b + ba.Omega0_ncdm_tot;
+        double z_NEDE = ba.z_decay_NEDE;
+        double trigger_mass = 0.5 * ba.H0 / ba.Bubble_trigger_H_over_m * pow(1. / (1. - ba.f_NEDE), 0.5) * pow(Omega_M * pow((1. + z_NEDE), 3) + Omega_M * pow((1. + z_NEDE), 4) / (3001.) + (1. - Omega_M), 0.5);
+        
+        xguess[index_guess] = pow(pfzw->target_value[index_guess]*trigger_mass/ba.H0, 2.)/(75.*pow(z_NEDE, 3.));
+        dxdy[index_guess] = 2.*pfzw->target_value[index_guess]*pow(trigger_mass/ba.H0, 2.)/(75.*pow(z_NEDE, 3.)); // derivative of xguess
+        break;
+      }
     }
   }
 
@@ -1493,6 +1497,44 @@ int input_try_unknown_parameters(double * unknown_parameter,
     case S8:
       output[i] = fo.sigma8[fo.index_pk_m]*sqrt(ba.Omega0_m/0.3);
       break;
+      case z_decay_NEDE: {
+        double z_decay = 0.;
+        double H_decay = ba.NEDE_trigger_mass*ba.Bubble_trigger_H_over_m;
+        for (int index_tau = 1; index_tau < ba.bt_size - 1; ++index_tau) {
+          double H_z = ba.background_table[index_tau*ba.bg_size + ba.index_bg_H];
+          if (H_decay > H_z) {
+            /* Linear interpolation to find approximate decay redshift */
+            double a1 = ba.background_table[(index_tau - 1)*ba.bg_size + ba.index_bg_a];
+            double a2 = ba.background_table[index_tau*ba.bg_size + ba.index_bg_a];
+            double H1 = ba.background_table[(index_tau - 1)*ba.bg_size + ba.index_bg_H];
+            double H2 = ba.background_table[index_tau*ba.bg_size + ba.index_bg_H];
+            double a_decay = a1 + (H_decay - H1)*(a2 - a1)/(H2 - H1);
+            z_decay = 1./a_decay - 1.;
+            break;
+          }
+        }
+        
+        output[i] = z_decay - pfzw->target_value[i];
+        if (input_verbose > 1) {
+          printf("z_decay=%f, target=%f\n", z_decay, pfzw->target_value[i]);
+        }
+        break;
+      }
+      case Omega0_NEDE_trigger_DM: {
+        output[i] = ba.Omega0_trigger - pfzw->target_value[i];
+        if (input_verbose > 1) {
+          printf("Omega0_NEDE_trigger_DM=%f, target=%f\n", ba.Omega0_trigger, pfzw->target_value[i]);
+        }
+        break;
+      }
+      case NEDE_trigger_ini: {
+        double Omega0_trigger_today = ba.background_table[(ba.bt_size-1)*ba.bg_size+ba.index_bg_rho_trigger]/ba.H0/ba.H0;
+        output[i] = ba.Omega0_trigger - Omega0_trigger_today;
+        if (input_verbose > 1) {
+          printf("NEDE_trigger_ini=%f, target=%f\n", ba.NEDE_trigger_ini, pfzw->target_value[i]);
+        }
+        break;
+      }
     }
   }
 
@@ -2340,6 +2382,10 @@ int input_read_parameters_species(struct file_content * pfc,
   int flag1, flag2, flag3;
   double param1, param2, param3;
   char string1[_ARGUMENT_LENGTH_MAX_];
+
+  int flag_NEDE, flag_NEDE_4;
+  char string_NEDE[_ARGUMENT_LENGTH_MAX_];
+  
   int fileentries;
   int N_ncdm=0, n, entries_read;
   double rho_ncdm;
@@ -3127,6 +3173,77 @@ int input_read_parameters_species(struct file_content * pfc,
       printf("Warning: Setting the tight_coupling_approximation = compromise_CLASS, since you selected idm-g!\n");
     ppr->tight_coupling_approximation = compromise_CLASS;
   }
+  
+  /** 7.3) New Early Dark Energy */
+  class_read_double("f_NEDE", pba->f_NEDE);
+  class_read_double("z_decay_NEDE", pba->z_decay_NEDE);                  /* Related by shooting */
+  class_read_double("NEDE_trigger_mass", pba->NEDE_trigger_mass);        /*                     */
+  class_read_double("three_eos_NEDE", pba->three_eos_NEDE);
+  class_read_double("three_ceff2_NEDE", ppt->three_ceff2_NEDE);
+  class_read_double("three_cvis2_NEDE", ppt->three_cvis2_NEDE);
+  class_read_double("H_over_m_NEDE", pba->Bubble_trigger_H_over_m);
+  class_read_double("Junction_tag", pba->Junction_tag);
+  class_read_double("Omega0_NEDE", pba->Omega0_NEDE); // Omega today, is only used internally, when finding a better fit for z_decay.
+  class_read_double("NEDE_trigger_ini", pba->NEDE_trigger_ini);      /* Related by shooting */
+  class_read_double("Omega0_NEDE_trigger_DM", pba->Omega0_trigger);  /*                     */
+
+  /* NEDE: Here we decide whether NEDE decays according to scenario A or B. Default: Scneario A*/
+
+  class_call(parser_read_string(pfc, "NEDE_fld_nature", &string_NEDE, &flag_NEDE_4, errmsg),
+             errmsg,
+             errmsg);
+
+  if (flag_NEDE_4 == _TRUE_)
+  {
+    if ((strstr(string_NEDE, "A") != NULL) || (strstr(string1, "stiff") != NULL) || (strstr(string1, "Scenario_A") != NULL) || (strstr(string1, "const") != NULL))
+    {
+      pba->NEDE_fld_nature = NEDE_fld_A;
+    }
+    if ((strstr(string_NEDE, "B") != NULL) || (strstr(string1, "decay") != NULL) || (strstr(string1, "Scenario_B") != NULL))
+    {
+      pba->NEDE_fld_nature = NEDE_fld_B;
+    }
+  }
+
+  // Decide if the effective sound speed is tracking the adiabatic sound speed. Default: no tracking (constant)
+  class_call(parser_read_string(pfc, "NEDE_ceff_nature", &string_NEDE, &flag_NEDE, errmsg),
+             errmsg,
+             errmsg);
+
+  if (flag_NEDE == _TRUE_)
+  {
+    if ((strstr(string_NEDE, "constant") != NULL) || (strstr(string1, "Constant") != NULL) || (strstr(string1, "CONSTANT") != NULL) || (strstr(string1, "const") != NULL))
+    {
+      ppt->NEDE_ceff_nature = NEDE_ceff_const;
+    }
+    if ((strstr(string_NEDE, "tracking") != NULL) || (strstr(string1, "Tracking") != NULL) || (strstr(string1, "TRACKING") != NULL))
+    {
+      ppt->NEDE_ceff_nature = NEDE_ceff_tracking;
+    }
+  }
+
+  if ((pba->Omega_NEDE > 0) || (pba->f_NEDE > 0)) {
+    if (pba->Omega_NEDE == 0)
+      pba->Omega_NEDE = pba->f_NEDE * pow(pba->NEDE_trigger_mass * pba->Bubble_trigger_H_over_m / pba->H0, 2);
+    else if (pba->f_NEDE == 0)
+      pba->f_NEDE = pba->Omega_NEDE / pow(pba->NEDE_trigger_mass * pba->Bubble_trigger_H_over_m / pba->H0, 2);
+    
+    class_test(pba->z_decay_NEDE == 0, errmsg,
+               "In input file, z_decay_NEDE  needs to be specified for NEDE (The trigger mass as input parameter has been retired in v5).");
+    
+    class_test(((pba->NEDE_trigger_ini == 0.) && (pba->Omega0_trigger == 0.)), errmsg,
+               "You must input either 'NEDE_trigger_ini' or 'Omega0_NEDE_trigger_DM' to set the trigger density.")
+
+    class_read_double("NEDE_trigger_fluid_H_m", pba->trigger_fluid_H_over_m);
+    
+    pba->trigger_fluid_approximation = _FALSE_;
+    pba->trigger_fluid_safety_factor = 1.05;
+    pba->phi_prime_ini_trigger = 0; // This value is set to the attractor later.
+
+    if (pba->NEDE_fld_nature == NEDE_fld_A)
+      pba->Omega0_NEDE = pba->Omega_NEDE * pow(1. / (1. + pba->z_decay_NEDE), (3. + pba->three_eos_NEDE));
+  }
+
 
   /* ** ADDITIONAL SPECIES ** */
 
@@ -3206,6 +3323,11 @@ int input_read_parameters_species(struct file_content * pfc,
   Omega_tot += pba->Omega0_dcdmdr;
   Omega_tot += pba->Omega0_idr;
   Omega_tot += pba->Omega0_ncdm_tot;
+  
+  /* NEDE budget, both zero if no NEDE */
+  Omega_tot += pba->Omega0_NEDE;
+  Omega_tot += pba->Omega0_trigger;
+
   /* Step 1 */
   if (flag1 == _TRUE_){
     pba->Omega0_lambda = param1;
@@ -5485,6 +5607,26 @@ int input_read_parameters_output(struct file_content * pfc,
   class_read_int("lensing_verbose",ple->lensing_verbose);
   class_read_int("distortions_verbose",psd->distortions_verbose);
   class_read_int("output_verbose",pop->output_verbose);
+  
+  /** Gauge to plot perturbations in */
+  char plot_gauge[_ARGUMENT_LENGTH_MAX_];
+  int flag_temp;
+  parser_read_string(pfc, "plot_gauge", &plot_gauge, &flag_temp, errmsg);
+  if (flag_temp == _TRUE_) {
+    if ((strcmp(plot_gauge, "newtonian") == 0) || (strcmp(plot_gauge, "Newtonian") == 0)) {
+      ppt->plot_gauge = 0; // indexed as in the possible_gauges of perturbations.h
+    }
+    else if ((strcmp(plot_gauge, "synchronous") == 0) || (strcmp(plot_gauge, "Synchronous") == 0)) {
+      ppt->plot_gauge = 1; // indexed as in the possible_gauges of perturbations.h
+    }
+    else {
+      class_test(0 == 0, errmsg, "Invalid input in 'plot_gauges'. Choose either 'newtonian' or 'synchronous'.")
+    }
+  }
+  else {
+    // Default is Newtonian gauge
+    ppt->plot_gauge = 0;
+  }
 
   return _SUCCESS_;
 
@@ -5806,6 +5948,28 @@ int input_default_params(struct background *pba,
   /** 7.2.4.b) temperature scaling idm_g */
   pth->n_index_idm_g = 0;
   ppt->has_idm_soundspeed = _FALSE_;
+  
+  /** 7.3) New EDE parameters */
+  pba->Omega_trigger_decay = 0.;
+  pba->three_eos_NEDE = 2.; // Default: w=2/3.
+  pba->Omega_NEDE = 0.;
+  pba->f_NEDE = 0;
+  pba->Omega0_NEDE = 0.;
+  pba->decay_flag = _FALSE_; // Initially the decay has not yet taken place.
+  pba->Junction_tag = 1;     // Default: standard junction condition inferred from matching.
+  pba->NEDE_trigger_ini = 0.;
+  pba->Omega0_trigger = 0.; // Default value
+  pba->trigger_fluid_H_over_m = 0.; /* Trigger fluid threshold. Default: Never turn on */
+  pba->a_trigger_fluid = 100.; /* True iff trigger field fluid approximation is turned on; default is never on */
+
+  pba->Bubble_trigger_H_over_m = .2; // Default value ionferred from miscroscpic model.
+  pba->NEDE_trigger_mass = 0.;
+  pba->z_decay_NEDE = 0.;
+
+  ppt->three_ceff2_NEDE = 2.; // Default: matches adiabatic sound speed.
+  ppt->three_cvis2_NEDE = 0.;
+  pba->NEDE_fld_nature = NEDE_fld_A;
+  ppt->NEDE_ceff_nature = NEDE_ceff_const;
 
   /* ** ADDITIONAL SPECIES ** */
 

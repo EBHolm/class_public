@@ -549,11 +549,14 @@ int evolver_ndf15(
       }
     }
     /** Output **/
+    int output_return;
     while ((next<tres)&&(tdir * (tnew - t_vec[next]) >= 0.0)){
       /* Do we need to write output? */
       if (tnew==t_vec[next]){
-        class_call((*output)(t_vec[next],ynew+1,f0+1,next,parameters_and_workspace_for_derivs,error_message),
-                   error_message,error_message);
+        
+        output_return = output(t_vec[next],ynew+1,f0+1,next,parameters_and_workspace_for_derivs,error_message);
+        // class_call((*output)(t_vec[next],ynew+1,f0+1,next,parameters_and_workspace_for_derivs,error_message),
+        //           error_message,error_message);
 // MODIFICATION BY LUC
 // All print_variables have been moved to the end of time step
 /*
@@ -567,11 +570,22 @@ int evolver_ndf15(
       else {
         /*Interpolate if we have overshot sample values*/
         interp_from_dif(t_vec[next],tnew,ynew,h,dif,k,yinterp,ypinterp,yppinterp,interpidx,neq,2);
-
-        class_call((*output)(t_vec[next],yinterp+1,ypinterp+1,next,parameters_and_workspace_for_derivs,
-                   error_message),error_message,error_message);
-
+        
+        output_return = output(t_vec[next],yinterp+1,ypinterp+1,next,parameters_and_workspace_for_derivs,error_message);
+        // class_call((*output)(t_vec[next],yinterp+1,ypinterp+1,next,parameters_and_workspace_for_derivs,
+        //            error_message),error_message,error_message);
       }
+      
+      if (output_return == _FAILURE_) {
+          // Cast CLASS error message by mimicing the class_call macro
+          class_call_message(error_message, output, error_message)
+          return _FAILURE_;
+      }
+      else if (output_return == _APPROXIMATION_REACHED_) {
+        // Early stopping due to turning on approximation
+        done = _TRUE_;
+      }
+      
       next++;
     }
     /** End of output **/
@@ -1084,7 +1098,7 @@ int fzero_Newton(int (*func)(double *x,
      take ntrial Newton-Raphson steps to improve the root.
      Stop if the root converges in either summed absolute
      variable increments tolx or summed absolute function values tolf.*/
-  int k,i,j,*indx, ntrial=20;
+  int k,i,j,*indx, ntrial=30;
   double errx,errf,d,*F0,*Fdel,**Fjac,*p, *lu_work;
   int has_converged = _FALSE_;
   int funcreturn;
@@ -1115,6 +1129,13 @@ int fzero_Newton(int (*func)(double *x,
     /** Compute F(x): */
     /**printf("x = [%f, %f], delx = [%e, %e]\n",
        x_inout[0],x_inout[1],delx[0],delx[1]);*/
+    /*
+    printf("Evaluating at x_inout: ");
+    for (int asdf = 0; asdf < x_size; asdf++) {
+      printf("x[%d]=%g, ", asdf, x_inout[asdf]);
+    }
+    printf("\n");
+    */
     class_call(func(x_inout, x_size, param, F0, error_message),
                error_message, error_message);
     /**    printf("F0 = [%f, %f]\n",F0[0],F0[1]);*/
@@ -1127,31 +1148,75 @@ int fzero_Newton(int (*func)(double *x,
       break;
     }
 
-    /**
-    if (k==1){
-      for (i=1; i<=x_size; i++){
-        delx[i-1] *= F0[i-1];
-      }
+    for (int i = 0; i < x_size; ++i){
+        if (k == 1) {
+          delx[i] = -dxdF[i]*F0[i];
+        }
+        else {
+            delx[i] = -toljac*p[i + 1];
+        }
     }
+    
+    
+    /* 
+       If shooting guess takes somewhere that gives an error, halve the step and try again
+       Copied from CLASS++
     */
+    double* x_inout_backup;
+    class_alloc(x_inout_backup,sizeof(double)*x_size,error_message);
+    for (int j = 0; j < x_size; j++) {
+      x_inout_backup[j] = x_inout[j];
+    }
 
     /** Compute the jacobian of F: */
     for (i=1; i<=x_size; i++){
-      if (F0[i-1]<0.0)
-        delx[i-1] *= -1;
-      x_inout[i-1] += delx[i-1];
-
-      /**      printf("x = [%f, %f], delx = [%e, %e]\n",
-               x_inout[0],x_inout[1],delx[0],delx[1]);*/
-      class_call(func(x_inout, x_size, param, Fdel, error_message),
-                 error_message, error_message);
-      /**      printf("F = [%f, %f]\n",Fdel[0],Fdel[1]);*/
+      int return_function = _FAILURE_;
+      for (int func_iter = 0; func_iter < 10; ++func_iter) {
+        x_inout[i - 1] = x_inout_backup[i - 1] + delx[i - 1];
+        
+        /*
+        printf("Evaluating at x_inout: ");
+        for (int asdf = 0; asdf < x_size; asdf++) {
+          printf("x[%d]=%g, ", asdf, x_inout[asdf]);
+        }
+        printf("\n");
+        */
+        return_function = func(x_inout, x_size, param, Fdel, error_message);
+        *fevals += 1;
+        
+        if (return_function == _SUCCESS_) {
+          double max_y_diff = 0.;
+          for (int j = 0; j < x_size; ++j) {
+            double yscal = MAX(1e-50, 0.5*(fabs(Fdel[j]) + fabs(F0[j])));
+            max_y_diff = MAX(max_y_diff, fabs((Fdel[j] - F0[j])/yscal));
+          }
+          if (max_y_diff > tolF*tolF) {
+            //Significant difference
+            break;
+          }
+          else {
+            delx[i - 1] *= 2;
+          }
+        }
+        else {
+          delx[i - 1] *= -0.5;
+        }
+      }
+      if (return_function == _FAILURE_) {
+        class_test(1 == 1, error_message, "Jacobian computation in Newtons method failed during shooting")
+      }
       for (j=1; j<=x_size; j++)
         Fjac[j][i] = (Fdel[j-1]-F0[j-1])/delx[i-1];
       x_inout[i-1] -= delx[i-1];
     }
-    *fevals = *fevals + x_size;
-
+    /*
+    printf("Found x_inout: ");
+    for (int asdf = 0; asdf < x_size; asdf++) {
+      printf("x[%d]=%g, ", asdf, x_inout[asdf]);
+    }
+    printf("\n");
+    */
+    
     for (i=1; i<=x_size; i++)
       p[i] = -F0[i-1]; //Right-hand side of linear equations.
     funcreturn = ludcmp(Fjac, x_size, indx, &d, lu_work); //Solve linear equations using LU decomposition.

@@ -24,6 +24,7 @@
 
 #define _SUCCESS_ 0 /**< integer returned after successful call of a function */
 #define _FAILURE_ 1 /**< integer returned after failure in a function */
+#define _APPROXIMATION_REACHED_ 2 /**< integer returned after reaching the threshold of a background approximation */
 
 #define _ERRORMSGSIZE_ 2048 /**< generic error messages are cut beyond this number of characters */
 typedef char ErrorMsg[_ERRORMSGSIZE_]; /**< Generic error messages (there is such a field in each structure) */
@@ -127,6 +128,18 @@ int string_begins_with(char* thestring, char beginchar);
 /* macro for calling function and returning error if it failed */
 #define class_call(function, error_message_from_function, error_message_output)                                  \
   class_call_except(function, error_message_from_function,error_message_output,)
+
+/* macro for calling output in evolvers with possiblity for approximation reached */
+#define class_evolver_output(function, error_message_from_function, error_message_output)  {                     \
+  int output_return = function;                                                                                  \
+  if (output_return == _FAILURE_) {                                                                              \
+      class_call_message(error_message, output, error_message)                                                   \
+      return _FAILURE_;                                                                                          \
+  }                                                                                                              \
+  else if (output_return == _APPROXIMATION_REACHED_) {                                                           \
+    done = _TRUE_;                                                                                               \
+  }                                                                                                              \
+}
 
 /* same in parallel region */
 #define class_call_parallel(function, error_message_from_function, error_message_output) {                       \
@@ -347,7 +360,8 @@ struct output;
  */
 enum evolver_type {
   rk, /* Runge-Kutta integrator */
-  ndf15 /* stiff integrator */
+  ndf15, /* stiff integrator */
+  rkdp45 /* Runge-Kutta Dormand-Prince */
 };
 
 /**
