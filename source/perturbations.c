@@ -9239,24 +9239,31 @@ int perturbations_derivs(double tau,
         4*metric_euler/(3.*k)*f_dr + fprime_dr/k*y[pv->index_pt_theta_dcdm];
 
       /** - ----> exact dr F2 */
-      dy[pv->index_pt_F0_dr+2] = 8./15.*(3./4.*k*y[pv->index_pt_F0_dr+1]+metric_shear*f_dr) -3./5.*k*s_l[3]/s_l[2]*y[pv->index_pt_F0_dr+3];
+      if (pba->dr_type == standard) {
+        dy[pv->index_pt_F0_dr+2] = 8./15.*(3./4.*k*y[pv->index_pt_F0_dr+1]+metric_shear*f_dr) -3./5.*k*s_l[3]/s_l[2]*y[pv->index_pt_F0_dr+3];
 
-      /** - ----> exact dr l=3 */
-      l = 3;
-      dy[pv->index_pt_F0_dr+3] = k/(2.*l+1.)*
-        (l*s_l[l]*s_l[2]*y[pv->index_pt_F0_dr+2]-(l+1.)*s_l[l+1]*y[pv->index_pt_F0_dr+4]);
+        /** - ----> exact dr l=3 */
+        l = 3;
+        dy[pv->index_pt_F0_dr+3] = k/(2.*l+1.)*
+          (l*s_l[l]*s_l[2]*y[pv->index_pt_F0_dr+2]-(l+1.)*s_l[l+1]*y[pv->index_pt_F0_dr+4]);
 
-      /** - ----> exact dr l>3 */
-      for (l = 4; l < pv->l_max_dr; l++) {
-        dy[pv->index_pt_F0_dr+l] = k/(2.*l+1)*
-          (l*s_l[l]*y[pv->index_pt_F0_dr+l-1]-(l+1.)*s_l[l+1]*y[pv->index_pt_F0_dr+l+1]);
+        /** - ----> exact dr l>3 */
+        for (l = 4; l < pv->l_max_dr; l++) {
+          dy[pv->index_pt_F0_dr+l] = k/(2.*l+1)*
+            (l*s_l[l]*y[pv->index_pt_F0_dr+l-1]-(l+1.)*s_l[l+1]*y[pv->index_pt_F0_dr+l+1]);
+        }
+
+        /** - ----> exact dr lmax_dr */
+        l = pv->l_max_dr;
+        dy[pv->index_pt_F0_dr+l] =
+          k*(s_l[l]*y[pv->index_pt_F0_dr+l-1]-(1.+l)*cotKgen*y[pv->index_pt_F0_dr+l]);
       }
-
-      /** - ----> exact dr lmax_dr */
-      l = pv->l_max_dr;
-      dy[pv->index_pt_F0_dr+l] =
-        k*(s_l[l]*y[pv->index_pt_F0_dr+l-1]-(1.+l)*cotKgen*y[pv->index_pt_F0_dr+l]);
-
+      else {
+        // Strongly self-interacting DR
+        for (l = 2; l <= pv->l_max_dr; l++) {
+          dy[pv->index_pt_F0_dr+l] = 0.;
+        }
+      }
     }
 
     /** - ---> fluid (fld) */

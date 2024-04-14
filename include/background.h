@@ -18,7 +18,6 @@ enum spatial_curvature {flat,open,closed};
 
 enum equation_of_state {CLP,EDE};
 
-
 /** list of possible parametrizations of the varying fundamental constants */
 
 enum varconst_dependence {varconst_none,varconst_instant};
@@ -32,6 +31,10 @@ enum vecback_format {short_info, normal_info, long_info};
     index (inter_closeby) */
 
 enum interpolation_method {inter_normal, inter_closeby};
+
+/** type of the dark radiation resulting from decaying cold dark matter */
+
+enum dr_type {standard, strongly_interacting};
 
 /**
  * background structure containing all the background information that
@@ -81,6 +84,7 @@ struct background
   double Omega_ini_dcdm;  /**< \f$ \Omega_{ini,dcdm} \f$: rescaled initial value for dcdm density (see 1407.2418 for definitions) */
   double Gamma_dcdm;      /**< \f$ \Gamma_{dcdm} \f$: decay constant for decaying cold dark matter */
   double tau_dcdm;
+  enum dr_type dr_type;
 
   int N_ncdm;                            /**< Number of distinguishable ncdm species */
   /* the following parameters help to define tabulated ncdm p-s-d passed in file */

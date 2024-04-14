@@ -2755,6 +2755,21 @@ int input_read_parameters_species(struct file_content * pfc,
   class_test(pba->Omega_ini_dcdm<0,errmsg,"You cannot set the initial dcdm density to negative values.");
 
   if (pba->Omega0_dcdmdr > 0 || (pba->Omega_ini_dcdm > 0.)) {
+    pba->dr_type = standard;
+    class_call(parser_read_string(pfc,"dr_type",&string1,&flag1,errmsg),
+               errmsg,
+               errmsg);
+    if (flag1 == _TRUE_) {
+      if ((strstr(string1,"sidr") != NULL) || (strstr(string1,"SIDR") != NULL)) {
+        pba->dr_type = strongly_interacting;
+      }
+      else if ((strstr(string1,"standard") != NULL) || (strstr(string1,"Standard") != NULL)) {
+        pba->dr_type = standard;
+      }
+      else {
+        class_stop(errmsg,"incomprehensible input '%s' for the field 'dr_type'",string1);
+      }
+    }
 
     /** 7.1.c) Gamma in same units as H0, i.e. km/(s Mpc)*/
     /* Read */
@@ -2764,10 +2779,20 @@ int input_read_parameters_species(struct file_content * pfc,
     class_call(parser_read_double(pfc,"tau_dcdm",&param2,&flag2,errmsg),                            // [s]
                errmsg,
                errmsg);
+    class_call(parser_read_double(pfc,"log10lifetime_dcdm_Gyr",&param3,&flag3,errmsg),              // [Gyr]
+            errmsg,
+            errmsg);
+    if (flag3 == _TRUE_) {
+      /* log10(lifetime) read; convert to Gamma*/
+      double lifetime = pow(10., param3);
+      param1 = 1./(lifetime*1.022e-12); // Gamma_dcdm, now in km/s/Mpc
+      flag1 = _TRUE_;
+    }
     /* Test */
     class_test(((flag1 == _TRUE_) && (flag2 == _TRUE_)),
                errmsg,
                "In input file, you can only enter one of Gamma_dcdm or tau_dcdm, choose one");
+
     /* Complete set of parameters */
     if (flag1 == _TRUE_){
       pba->Gamma_dcdm = param1*(1.e3/_c_);                                                          // [Mpc]
@@ -2777,6 +2802,7 @@ int input_read_parameters_species(struct file_content * pfc,
       pba->Gamma_dcdm = _Mpc_over_m_/(param2*_c_);                                                  // [Mpc]
       pba->tau_dcdm = param2;                                                                       // [s]
     }
+
     /* Test */
     class_test(pba->tau_dcdm<0.,
                errmsg,
