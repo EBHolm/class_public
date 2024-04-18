@@ -3220,6 +3220,29 @@ int input_read_parameters_species(struct file_content * pfc,
     {
       ppt->NEDE_ceff_nature = NEDE_ceff_tracking;
     }
+    if ((strstr(string_NEDE, "twice linear") != NULL) || (strstr(string1, "Twice linear") != NULL) || (strstr(string1, "twice") != NULL))
+    {
+      ppt->NEDE_ceff_nature = NEDE_ceff_twice_linear;
+      flag1 = 0;
+      flag2 = 0;
+      flag3 = 0;
+      int flag4 = 0;
+      class_call(parser_read_double(pfc,"NEDE_cs2_slope_1",&ppt->NEDE_cs2_slope_1,&flag1,errmsg),
+                 errmsg,
+                 errmsg);
+      class_call(parser_read_double(pfc,"NEDE_cs2_intercept_1",&ppt->NEDE_cs2_intercept_1,&flag2,errmsg),
+                 errmsg,
+                 errmsg);
+      class_call(parser_read_double(pfc,"NEDE_cs2_slope_2",&ppt->NEDE_cs2_slope_2,&flag3,errmsg),
+                 errmsg,
+                 errmsg);
+      class_call(parser_read_double(pfc,"NEDE_cs2_intercept_2",&ppt->NEDE_cs2_intercept_2,&flag4,errmsg),
+                 errmsg,
+                 errmsg);
+      if (flag1*flag2*flag3*flag4 != 1) {
+        class_test(_TRUE_, errmsg, "To use the 'twice linear' parametrisation of the NEDE sound speed, you need to input all of the following: NEDE_cs2_slope_1, NEDE_cs2_intercept_1, NEDE_cs2_slope_2, NEDE_cs2_intercept_2.")
+      }
+    }
   }
 
   if ((pba->Omega_NEDE > 0) || (pba->f_NEDE > 0)) {

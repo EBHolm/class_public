@@ -755,8 +755,12 @@ int perturbations_init(
     printf("  -> NEDE perturbation details:\n");
     if (ppt->NEDE_ceff_nature == NEDE_ceff_const)
       printf("     -> 3*ceff2: %f (constant)\n", ppt->three_ceff2_NEDE);
-    else
+    else if (ppt->NEDE_ceff_nature == NEDE_ceff_tracking)
       printf("     -> ceff2 = ca2 (tracking) \n");
+    else if (ppt->NEDE_ceff_nature == NEDE_ceff_twice_linear)
+      printf("     -> ceff2 = twice linear \n");
+    else
+      printf("     -> ceff2 not understood!\n");
     printf("     -> 3*cvis2: %f (constant) \n", ppt->three_cvis2_NEDE);
     printf("     -> Junction_tag: %d \n", pba->Junction_tag);
     printf("     -> NEDE sub-dominant condition: %e \n", ppr->sub_dom_cond);
@@ -8195,8 +8199,20 @@ int perturbations_total_stress_energy(
          {
            if (ppt->NEDE_ceff_nature == NEDE_ceff_const)
              cs2_NEDE = ppt->three_ceff2_NEDE / 3.;
-           else
+           else if (ppt->NEDE_ceff_nature == NEDE_ceff_tracking)
              cs2_NEDE = ca2_NEDE;
+           else if (ppt->NEDE_ceff_nature == NEDE_ceff_twice_linear) {
+             double k_horizon = 2*_PI_*a*pvecback[pba->index_bg_H];
+             if (k > k_horizon) {
+               cs2_NEDE = ppt->NEDE_cs2_slope_1*k + ppt->NEDE_cs2_intercept_1;
+             }
+             else {
+               cs2_NEDE = ppt->NEDE_cs2_slope_2*k + ppt->NEDE_cs2_intercept_2;
+             }
+           }
+           else {
+             class_test(_FALSE_, ppt->error_message, "NEDE sound speed not understood.")
+           }
          }
 
          ppw->delta_rho = ppw->delta_rho + ppw->pvecback[pba->index_bg_rho_NEDE] * delta_NEDE;
@@ -10869,8 +10885,20 @@ int perturbations_derivs(double tau,
         {
           if (ppt->NEDE_ceff_nature == NEDE_ceff_const)
             cs2_NEDE = ppt->three_ceff2_NEDE / 3.;
-          else
+          else if (ppt->NEDE_ceff_nature == NEDE_ceff_tracking)
             cs2_NEDE = ca2_NEDE;
+          else if (ppt->NEDE_ceff_nature == NEDE_ceff_twice_linear) {
+            double k_horizon = 2*_PI_*a*pvecback[pba->index_bg_H];
+            if (k > k_horizon) {
+              cs2_NEDE = ppt->NEDE_cs2_slope_1*k + ppt->NEDE_cs2_intercept_1;
+            }
+            else {
+              cs2_NEDE = ppt->NEDE_cs2_slope_2*k + ppt->NEDE_cs2_intercept_2;
+            }
+          }
+          else {
+            class_test(_FALSE_, ppt->error_message, "NEDE sound speed not understood.")
+          }
         }
 
         /** - -----> NEDE density */
