@@ -8202,7 +8202,7 @@ int perturbations_total_stress_energy(
            else if (ppt->NEDE_ceff_nature == NEDE_ceff_tracking)
              cs2_NEDE = ca2_NEDE;
            else if (ppt->NEDE_ceff_nature == NEDE_ceff_twice_linear) {
-             double k_horizon = 2*_PI_*a*pvecback[pba->index_bg_H];
+             double k_horizon = 2*_PI_*a*ppw->pvecback[pba->index_bg_H];
              if (k > k_horizon) {
                cs2_NEDE = ppt->NEDE_cs2_slope_1*k + ppt->NEDE_cs2_intercept_1;
              }
