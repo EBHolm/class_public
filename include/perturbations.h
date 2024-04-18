@@ -185,6 +185,7 @@ struct perturbations
   
   double three_ceff2_NEDE;
   double three_cvis2_NEDE;
+  double cs2_NEDE;
   int NEDE_ceff_nature;
 
   double z_max_pk; /**< when we compute only the matter spectrum / transfer functions, but not the CMB, we are sometimes interested to sample source functions at very high redshift, way before recombination. This z_max_pk will then fix the initial sampling time of the sources. */
