@@ -8210,9 +8210,6 @@ int perturbations_total_stress_energy(
                cs2_NEDE = ppt->NEDE_cs2_slope_2*k + ppt->NEDE_cs2_intercept_2;
              }
            }
-           else {
-             class_test(_FALSE_, ppt->error_message, "NEDE sound speed not understood.")
-           }
          }
 
          ppw->delta_rho = ppw->delta_rho + ppw->pvecback[pba->index_bg_rho_NEDE] * delta_NEDE;
