@@ -8209,6 +8209,7 @@ int perturbations_total_stress_energy(
              else {
                cs2_NEDE = ppt->NEDE_cs2_slope_2*k + ppt->NEDE_cs2_intercept_2;
              }
+             class_test(cs2_NEDE < 0., ppt->error_message, "NEDE sound speed is negative with the given 'twice linear' parametrisation parameters.")
            }
          }
 
