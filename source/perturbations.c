@@ -5633,6 +5633,9 @@ int perturbations_vector_init(
               amp_rel = 1.;
               sigma_NEDE = 0.0;
             }
+            else {
+              class_stop(ppt->error_message, "Junction tag value not understood.")
+            }
 
             // printf("k: %f, aH: %f, h': %f, eta': %f, alpha1: %f, alpha2: %f \n",k,a_prime_over_a ,ppw->pvecmetric[ppw->index_mt_h_prime],ppw->pvecmetric[ppw->index_mt_eta_prime],(ppw->pvecmetric[ppw->index_mt_h_prime] + 6.0*ppw->pvecmetric[ppw->index_mt_eta_prime])/(2.0 *k*k),ppw->pvecmetric[ppw->index_mt_alpha]);
 
@@ -8179,7 +8182,7 @@ int perturbations_total_stress_energy(
 
       if (pba->has_NEDE_trigger_DM == _TRUE_)
       {
-        if ((ppw->approx[ppw->index_ap_tfa] == (int)tfa_on))
+        if (ppw->approx[ppw->index_ap_tfa] == (int)tfa_on)
         {
           delta_trigger = y[ppw->pv->index_pt_delta_trigger_fld];
           theta_trigger = y[ppw->pv->index_pt_theta_trigger_fld];
@@ -8192,7 +8195,6 @@ int perturbations_total_stress_energy(
          class_call(background_quantities_NEDE(pba, a, a_prime_over_a, NULL, NULL, &w_NEDE, &dw_over_da_NEDE, &ca2_NEDE),
                     pba->error_message,
                     pba->error_message);
-         double w_prime_NEDE = dw_over_da_NEDE * a_prime_over_a * a;
          /** Decide if effective rest-frame sound speed is constant or tracking the adiabatic sound speed (note that w_NEDE=const). */
 
          if (pba->NEDE_fld_nature == NEDE_fld_A)
@@ -8211,6 +8213,12 @@ int perturbations_total_stress_energy(
              }
              class_test(cs2_NEDE < 0., ppt->error_message, "NEDE sound speed is negative with the given 'twice linear' parametrisation parameters.")
            }
+           else {
+             class_stop(ppt->error_message, "NEDE c_eff nature not understood.")
+           }
+         }
+         else {
+           class_stop(ppt->error_message, "NEDE fld nature not understood.")
          }
 
          ppw->delta_rho = ppw->delta_rho + ppw->pvecback[pba->index_bg_rho_NEDE] * delta_NEDE;
@@ -10873,7 +10881,6 @@ int perturbations_derivs(double tau,
         class_call(background_quantities_NEDE(pba, a, a_prime_over_a, NULL, NULL, &w_NEDE, &dw_over_da_NEDE, &ca2_NEDE),
                    pba->error_message,
                    pba->error_message);
-        double w_prime_NEDE = dw_over_da_NEDE * a_prime_over_a * a;
 
         /*The NEDE implementation so far assumes w_prime_NEDE=0*/
 
@@ -10895,8 +10902,11 @@ int perturbations_derivs(double tau,
             }
           }
           else {
-            class_test(_FALSE_, ppt->error_message, "NEDE sound speed not understood.")
+            class_stop(ppt->error_message, "NEDE sound speed not understood.")
           }
+        }
+        else {
+          class_stop(ppt->error_message, "NEDE fld nature not understood.")
         }
 
         /** - -----> NEDE density */
@@ -11872,11 +11882,8 @@ int trigger_NEDE_cs2(
   m = pba->NEDE_trigger_mass;
 
   // We use the improved formula for the sound speed derived in arXiv: 2201.10238
-  if (cs2 != NULL)
-  {
-    *cs2 = pow((a * m) / k * (pow(1.0 + pow(k / (a * m), 2), 0.5) - 1.0), 2) + 5.0 / 4.0 * pow(H / m, 2);
-    //*cs2 = k * k / (4.0 * pow(pba->NEDE_trigger_mass, 2) * a * a + k*k);
-  }
+  *cs2 = pow((a * m) / k * (pow(1.0 + pow(k / (a * m), 2), 0.5) - 1.0), 2) + 5.0 / 4.0 * pow(H / m, 2);
+  //*cs2 = k * k / (4.0 * pow(pba->NEDE_trigger_mass, 2) * a * a + k*k);
 
   return _SUCCESS_;
 }

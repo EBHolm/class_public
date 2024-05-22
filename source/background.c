@@ -908,13 +908,9 @@ int background_quantities_NEDE(
     double *dw_over_da,
     double *ca2)
 {
-  double x, a_over_a_non_rel;
-  double rhohat, phat, drhohat_dx, dphat_dx;
-  int last_index_1 = 1, last_index_2, i;
   double w_prime;
   double w_local = 0.;
-  double rho_local, dw_over_da_local;
-  double *vec;
+  double rho_local;
 
   switch (pba->NEDE_fld_nature)
   {

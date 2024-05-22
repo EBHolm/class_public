@@ -516,7 +516,7 @@ int input_shooting(struct file_content * pfc,
   double param1, param2;
   double * unknown_parameter;
   int unknown_parameters_size;
-  int counter, index_target, i;
+  int counter, index_target;
   int fevals=0;
   double xzero;
   double *dxdF, *x_inout;
